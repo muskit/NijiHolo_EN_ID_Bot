@@ -1,2 +1,5 @@
 ## The bot's listen mode
-# Listen for cross-company interactions.
+# Continuously listen for cross-company interactions.
+
+def run():
+    pass

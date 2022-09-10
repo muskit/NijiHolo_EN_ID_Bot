@@ -4,9 +4,9 @@ import os
 import configparser
 
 # returns dictionary of the Credentials section.
-# NOT TO BE USED OUTSIDE OF THIS FILE.
+# [NOT TO BE USED OUTSIDE OF THIS FILE.]
 def get_ini_credentials():
-    c = configparser.ConfigParser()
+    c = configparser.RawConfigParser()
     if len(c.read(os.path.join(os.path.dirname(__file__), os.pardir, 'secrets.ini'))) > 0 and c.has_section('Credentials'):
         return c['Credentials']
     return None
@@ -24,7 +24,10 @@ def api_secret():
 # returns the bearer_token stored in secrets.ini
 def bearer_token():
     c = get_ini_credentials()
-    return c.get(option='bearer_token', fallback='xxx') if c is not None else 'zzz'
+    return c.get(option='bearer_token', fallback='zzz') if c is not None else 'zzz'
+
+def get_all_secrets():
+    return f'api_key:{api_key()}\napi_secret:{api_secret()}\nbearer_token:{bearer_token()}'
 
 # print(api_key())
 # print(api_secret())
