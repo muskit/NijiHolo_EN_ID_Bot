@@ -4,17 +4,18 @@
 
 ## Roadmap
 * Read past tweets of members from both companies
-* Store tweets in a queue file
+* Track tweets in queue and history/log files
 * Create image of tweet, including up to three image attachments from that tweet
 * Combine image(s) with quote retweet
-* Don't tweet already-existing tweets (check quoted RTs?)
-* Check out new tweets as soon as they post
+* Don't tweet already-existing tweets (check our past quote RTs; might be saved in a file for quicker access)
+* Listen for live tweets as soon as they post
 
 ## Notes
 * Tweets should only occur if involved parties are cross-company
-* Tweets should only occur if interaction involves [EN and EN] or [EN and (former) ID members]
+* Tweets should only occur if interaction involves [EN and EN] or [EN and (former) ID] parties
     * cross-company ID interactions are regular enough
-* Text of tweet should include involved names (w/o @) and the message, up to tweet limit
+* Text of our tweet should include involved names (w/o @) and the message, up to our tweet limit
+    * this, along with image, helps archive deleted tweets
 
 ## API Calls
 **retrieving tweets from a user**
