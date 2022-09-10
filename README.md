@@ -1,13 +1,13 @@
-# NijiHoloBot
-### A Twitter bot that tweets when a Twitter interaction occurs between Nijisanji EN/ID and hololive EN/ID members.
-...cause some people are that desperate. Like me!
+# NijiHolo_EN_ID_Bot
+### Twitter bot that follows interactions between Nijisanji EN/ID and hololive EN/ID members.
+...because some folks are that desperate. Like me!
 
 ## Roadmap
 * Read past tweets of members from both companies
 * Store tweets in a queue file
 * Create image of tweet, including up to three image attachments from that tweet
 * Combine image(s) with quote retweet
-* Don't tweet already-existing tweets (check quoted RT?)
+* Don't tweet already-existing tweets (check quoted RTs?)
 * Check out new tweets as soon as they post
 
 ## Notes

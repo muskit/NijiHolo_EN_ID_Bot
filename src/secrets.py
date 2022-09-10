@@ -1,3 +1,5 @@
+## Twitter developer credentials management.
+
 import os
 import configparser
 
