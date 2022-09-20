@@ -2,11 +2,11 @@
 
 import os
 
-global twAPI
+# Twitter API instance to share throughout program
 twAPI = None
 
 # returns system path to this project, which is
-# up one level from this file's directory.
+# up one level from this file's directory (src).
 def get_project_dir():
     return os.path.join(os.path.dirname(__file__), os.pardir)
 

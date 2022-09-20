@@ -1,6 +1,6 @@
 ## The bot's catch-up mode
 # Scan all accounts for cross-company interactions.
-# Terminates when finished scanning.
+# Terminates when finished scanning and posting.
 
 import os
 import TwitterAPI as api
