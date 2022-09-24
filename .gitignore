@@ -143,4 +143,4 @@ cython_debug/
 .vscode
 
 # project-specific
-secrets.ini
+/secrets.ini

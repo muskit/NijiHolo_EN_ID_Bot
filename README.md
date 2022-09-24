@@ -2,6 +2,8 @@
 *Twitter bot that follows interactions between Nijisanji EN/ID and hololive EN/ID members.*  
 ...because some folks are that desperate. Like me!
 
+**This project is intended to run [this account](https://twitter.com/NijiHoloEN_Msgs).**
+
 ## Roadmap
 * Read past tweets of members from both companies
 * Track tweets in queue and history/log files
