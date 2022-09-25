@@ -1,2 +1,3 @@
 tweepy
 tweet-capture
+git+https://github.com/muskit/twint_2022_fix.git

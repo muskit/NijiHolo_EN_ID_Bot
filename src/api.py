@@ -3,7 +3,8 @@ from math import inf
 from urllib import response
 import tweepy
 
-import secrets
+import api_secrets
+import talenttweet as tt
 import util
 
 class TwAPI:
@@ -12,14 +13,6 @@ class TwAPI:
     TWEET_FIELDS = ['created_at', 'in_reply_to_user_id']
     TWEET_EXPANSIONS = ['entities.mentions.username', 'referenced_tweets.id.author_id']
 
-    def __init__(self):
-        TwAPI.instance = self
-        self.client = tweepy.Client(
-            bearer_token=secrets.bearer_token(),
-            consumer_key=secrets.api_key(), consumer_secret=secrets.api_secret(),
-            access_token=secrets.access_token(), access_token_secret=secrets.access_secret()
-        )
-    
     # Returns a set of involved parties for a single tweet.
     #
     # Tweet must have been queried with these parameters:
@@ -47,23 +40,18 @@ class TwAPI:
                             involved_parties.add(incl_tweet.author_id)
 
         return involved_parties
+
+    def __init__(self):
+        TwAPI.instance = self
+        self.client = tweepy.Client(
+            bearer_token=api_secrets.bearer_token(),
+            consumer_key=api_secrets.api_key(), consumer_secret=api_secrets.api_secret(),
+            access_token=api_secrets.access_token(), access_token_secret=api_secrets.access_secret()
+        )
     
-    # Returns a tweet and mention-set pair, given a tweet ID.
-    def get_tweet_mentions(self, id):
-        resp = self.client.get_tweet(id,
-            media_fields=TwAPI.TWEET_MEDIA_FIELDS,
-            tweet_fields=TwAPI.TWEET_FIELDS,
-            expansions=TwAPI.TWEET_EXPANSIONS)
-        
-        tweet = resp.data
-        mentions = TwAPI.get_involved_parties(tweet, resp)
-        return (tweet, mentions)
-    
-    # Returns a list (tweet, {mentions}) from a user.
-    # mentions- a set comprised of any other parties involved
-    # in this tweet (reply, mention, qrt)
+    # Returns a list of TalentTweets from a user.
     def get_users_all_tweets_mentions(self, id: int, count=inf):
-        pairs = list()
+        ttweets = list()
 
         retrieve_size = util.clamp(count, 5, 100)
         next_page_token = None
@@ -79,7 +67,7 @@ class TwAPI:
 
             for tweet in resp.data:
                 mentions = TwAPI.get_involved_parties(tweet, resp)
-                pairs.append((tweet, mentions))
+                ttweets.append(tt.TalentTweet(tweet=tweet, other_parties=mentions))
 
             # update counters and pagination token
             tweets_retrieved += resp.meta['result_count']
@@ -92,15 +80,15 @@ class TwAPI:
                     break  # reached end of user's tweets
 
         print(f'Retrieved {tweets_retrieved} tweets using {tokens_retrieved} tokens.')
-        return pairs
+        return ttweets
     
-    # returns a filtered list (tweet, [mentions]) from a user
+    # Returns a list of cross-company TalentTweets from a user.
     def get_users_cross_tweets_mentions(self, id):
         ret = list()
-        pairs = self.get_users_all_tweets_mentions(id)
-        for pair in pairs:
-            if util.is_cross_company(pair):
-                ret.append(pair)
+        ttweets = self.get_users_all_tweets_mentions(id)
+        for ttweet in ttweets:
+            if ttweet.is_cross_company():
+                ret.append(ttweet)
         
         return ret
 

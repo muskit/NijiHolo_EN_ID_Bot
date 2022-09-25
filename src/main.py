@@ -3,12 +3,10 @@ import argparse
 from argparse import RawTextHelpFormatter
 
 import talent_lists
-import secrets
+import api_secrets
 import catchup
 import listen
-
 from api import TwAPI
-from util import is_cross_company, print_tweet
 
 MODES_HELP_STR = '''mode to run the bot at:
 l,listen:       listen for new tweets from all accounts; will not terminate unless error occurs
@@ -21,6 +19,10 @@ def init_argparse():
     p.add_argument('--show-tokens', action='store_true', help='[DO NOT USE IN PUBLIC SETTING] print stored tokens from secrets.ini')
     return p
 
+# TODO: implement command line mode for manually controlling the bot
+def command_line():
+    pass
+
 def main():
     parser = init_argparse()
     if len(sys.argv) < 2:
@@ -30,7 +32,7 @@ def main():
     args = parser.parse_args()
 
     if args.show_tokens:
-        print(secrets.get_all_secrets())
+        print(api_secrets.get_all_secrets())
 
     if args.mode is None: return
 
@@ -42,11 +44,6 @@ def main():
     # Initialize talent account lists
     talent_lists.init()
 
-    ## TEST CODE ##
-    cross_pairs = twApi.get_users_cross_tweets_mentions(1390620618001838086)
-    for pair in cross_pairs:
-        print_tweet(pair)
-
     ## Determine running mode
     match args.mode.lower():
         case 'l' | 'listen':
@@ -55,7 +52,9 @@ def main():
         case 'c' | 'catchup':
             print('RUNNING IN CATCH-UP MODE\n')
             catchup.run()
-        case _:
+        case _: 
+            command_line()
+            #TODO: remove message
             print('\ninvalid mode. run with no arguments or "-h" for help page, including mode list.')
             return
     
