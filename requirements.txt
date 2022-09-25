@@ -1,3 +1,5 @@
-tweepy
+nest-asyncio
+pytz
 tweet-capture
+tweepy
 git+https://github.com/muskit/twint_2022_fix.git

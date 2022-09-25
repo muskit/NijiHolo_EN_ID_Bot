@@ -1,6 +1,9 @@
 import sys
+import asyncio
 import argparse
 from argparse import RawTextHelpFormatter
+
+import nest_asyncio
 
 import talent_lists
 import api_secrets
@@ -23,7 +26,7 @@ def init_argparse():
 def command_line():
     pass
 
-def main():
+async def main():
     parser = init_argparse()
     if len(sys.argv) < 2:
         parser.print_help()
@@ -51,7 +54,7 @@ def main():
             listen.run()
         case 'c' | 'catchup':
             print('RUNNING IN CATCH-UP MODE\n')
-            catchup.run()
+            await catchup.run()
         case _: 
             command_line()
             #TODO: remove message
@@ -60,4 +63,5 @@ def main():
     
 
 if __name__ == "__main__":
-    main()
+    nest_asyncio.apply()
+    asyncio.run(main())
