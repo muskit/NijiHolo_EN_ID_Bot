@@ -87,13 +87,18 @@ class TalentTweet:
         return s[:-1]
 
     def is_cross_company(self):
-        # TODO: update for EN/ID
         for other_id in self.all_parties:
-            if self.author_id in talent_lists.niji_en:
-                if other_id in talent_lists.holo_en:
+            if self.author_id in talent_lists.holo_en:
+                if other_id in talent_lists.niji_en or other_id in talent_lists.niji_exid:
                     return True
-            elif self.author_id in talent_lists.holo_en:
+            if self.author_id in talent_lists.niji_en:
+                if other_id in talent_lists.holo_en or other_id in talent_lists.holo_id:
+                    return True
+            if self.author_id in talent_lists.holo_id:
                 if other_id in talent_lists.niji_en:
+                    return True
+            if self.author_id in talent_lists.niji_exid:
+                if other_id in talent_lists.holo_en:
                     return True
         return False
     

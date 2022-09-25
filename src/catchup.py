@@ -52,6 +52,6 @@ async def run():
     # ttweet = tt.TalentTweet.deserialize(serialized_ttweet)
     # print(ttweet)
 
-    ttweet = tt.TalentAPITweet(1573563417415233536)
+    ttweet = tt.TalentAPITweet(1557021645331542016)
     print(ttweet)
-    # await TwAPI.instance.create_post(ttweet)
+    await TwAPI.instance.create_post(ttweet)
