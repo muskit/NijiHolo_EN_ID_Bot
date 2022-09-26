@@ -9,7 +9,7 @@ import talent_lists
 import api_secrets
 import catchup
 import listen
-from api import TwAPI
+from twapi import TwAPI
 
 MODES_HELP_STR = '''mode to run the bot at:
 l,listen:       listen for new tweets from all accounts; will not terminate unless error occurs

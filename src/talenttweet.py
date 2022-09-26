@@ -3,7 +3,7 @@ import platform
 
 import pytz
 
-from api import *
+from twapi import *
 import talent_lists
 
 class TalentTweet:
@@ -121,6 +121,7 @@ class TalentAPITweet(TalentTweet):
         if tweet and mrq:
             self.tweet = tweet
         elif tweet_id:
+            tweet_id = int(tweet_id)
             resp = TwAPI.instance.get_tweet_response(tweet_id)
             self.tweet = resp.data
             mrq = TwAPI.get_mrq(self.tweet, resp)

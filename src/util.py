@@ -5,11 +5,11 @@ import os
 import twint
 from tweetcapture import TweetCapture
 
-from talent_lists import *
+import talent_lists
 import talenttweet as tt
 
 # returns system path to this project, which is
-# up one level from this file's directory (src).
+# up one level from this file's directory (effective path: ..../src/../).
 def get_project_dir():
     return os.path.join(os.path.dirname(__file__), os.pardir)
 
@@ -43,6 +43,9 @@ def ttweet_to_url(ttweet):
     return f'https://twitter.com/{username}/status/{ttweet.tweet_id}'
 
 def get_username(user_id):
+    return talent_lists.talents.get(user_id, f'#{id}')
+
+def get_username_online(user_id):
     c = twint.Config()
     c.User_id = user_id
     c.Store_object = True
@@ -50,6 +53,7 @@ def get_username(user_id):
     try:
         twint.run.Lookup(c)
         user = twint.output.users_list[0]
+        twint.output.users_list.clear()
         return user.username
     except:
-        return talents.get(user_id, f'#{user_id}')
+        return f'#{user_id}'
