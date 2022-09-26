@@ -2,6 +2,7 @@ from datetime import datetime
 import platform
 
 import pytz
+import twint
 
 from twapi import *
 import talent_lists
@@ -41,6 +42,27 @@ class TalentTweet:
             date_time=date_time, mrq=(mentions, reply_to, quote_retweeted)
         )
     
+    @staticmethod
+    def create_from_twint_tweet(tweet):
+        # qrt
+        if tweet.quote_url != '':
+            return TalentTweet(tweet_id=tweet.id)
+
+        # MRQ (Q is guaranteed to be None)
+        mentions = set()
+        reply_to = None
+        
+        # reply_to/mentions
+        is_reply = tweet.id == int(tweet.conversation_id)
+        if is_reply:
+            reply_to = tweet.reply_to[0]
+            mentions = set(tweet.reply_to[1:])
+        mentions.add(*tweet.mentions)
+
+        datetime = datetime.strptime(tweet.datetime, '%Y-%m-%d %H:%M:%S %Z')
+        return TalentTweet(tweet_id=tweet.id, author_id=tweet.user_id, date_time=datetime, mrq=(mentions, reply_to, None))
+
+
     @staticmethod
     async def create_from_id(id):
         resp = await TwAPI.instance.get_tweet_response(id)
