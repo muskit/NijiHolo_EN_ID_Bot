@@ -51,9 +51,9 @@ def get_username_online(user_id):
     c.Store_object = True
     c.Hide_output = True
     try:
+        twint.output.users_list.clear()
         twint.run.Lookup(c)
         user = twint.output.users_list[0]
-        twint.output.users_list.clear()
         return user.username
     except:
         return f'#{user_id}'

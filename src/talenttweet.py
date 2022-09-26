@@ -40,7 +40,19 @@ class TalentTweet:
             tweet_id=tweet_id, author_id=author_id,
             date_time=date_time, mrq=(mentions, reply_to, quote_retweeted)
         )
-        
+    
+    @staticmethod
+    async def create_from_id(id):
+        resp = await TwAPI.instance.get_tweet_response(id)
+        tweet = resp.data
+        mrq = TwAPI.get_mrq(tweet, resp)
+
+        return TalentTweet(
+            tweet_id=tweet.id,
+            author_id=tweet.author_id,
+            date_time=tweet.created_at,
+            mrq=mrq
+        )
 
     def __init__(self, tweet_id: int, author_id: int,date_time: datetime, mrq: tuple):
         self.tweet_id, self.author_id = tweet_id, author_id
@@ -114,39 +126,3 @@ class TalentTweet:
     def get_datetime_str(self):
         unpad = '#' if platform.system() == 'Windows' else '-'
         return self.date_time.strftime(f'%b %{unpad}d %Y, %{unpad}I:%M%p (%Z)')
-
-
-class TalentAPITweet(TalentTweet):
-    def __init__(self, tweet_id=None, tweet=None, mrq: tuple=None):
-        if tweet and mrq:
-            self.tweet = tweet
-        elif tweet_id:
-            tweet_id = int(tweet_id)
-            resp = TwAPI.instance.get_tweet_response(tweet_id)
-            self.tweet = resp.data
-            mrq = TwAPI.get_mrq(self.tweet, resp)
-        else:
-            raise ValueError('did not supply sufficient tweet information')
-
-        TalentTweet.__init__(
-            self,
-            tweet_id=self.tweet.id,
-            author_id=self.tweet.author_id,
-            date_time=self.tweet.created_at,
-            mrq=mrq
-        )
-    
-    def __repr__(self) -> str:
-        return (
-            f'{self.tweet_id} from {util.get_username(self.author_id)}:\n'
-            f'{self.tweet.text}\n'
-            f'------------------------------------------------------\n'
-            f'{self.get_datetime_str()}\n'
-            f'{self.get_all_parties_usernames()}\n'
-            f'mentions: {self.mentions}\n'
-            f'reply_to: {self.reply_to}\n'
-            f'quote_retweeted: {self.quote_retweeted}\n'
-            f'{self.serialize()}\n'
-            f'Cross-company: {self.is_cross_company()}\n'
-            f'======================================================'
-        )

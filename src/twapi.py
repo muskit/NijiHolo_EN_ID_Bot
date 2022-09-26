@@ -1,5 +1,6 @@
 import asyncio
 from math import inf
+from time import time
 
 import tweepy
 from tweetcapture import TweetCapture
@@ -61,13 +62,18 @@ class TwAPI:
             access_token=api_secrets.access_token(), access_token_secret=api_secrets.access_secret()
         )
     
-    def get_tweet_response(self, id):
-        return TwAPI.instance.client.get_tweet(
-            id,
-            media_fields=TwAPI.TWEET_MEDIA_FIELDS,
-            tweet_fields=TwAPI.TWEET_FIELDS,
-            expansions=TwAPI.TWEET_EXPANSIONS
-        )
+    async def get_tweet_response(self, id, attempt = 0):
+        try:
+            return TwAPI.instance.client.get_tweet(
+                id,
+                media_fields=TwAPI.TWEET_MEDIA_FIELDS,
+                tweet_fields=TwAPI.TWEET_FIELDS,
+                expansions=TwAPI.TWEET_EXPANSIONS
+            )
+        except tweepy.TooManyRequests:
+            print(f'[{attempt}]get_tweet_response({id}):\n\ttoo many API requests -- trying again in 1 minute...')
+            await asyncio.sleep(60)
+            return await self.get_tweet_response(id, attempt=attempt+1)
 
     # Create a post that showcases given tweet and its mentions set.
     # Try do do this without retireving Tweet data.
