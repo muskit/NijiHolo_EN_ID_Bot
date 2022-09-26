@@ -6,6 +6,8 @@ niji_en = dict()
 niji_exid = dict()
 talents = dict()
 
+test_talents = dict()
+
 def __create_dict(file, _dict):
     print(f'Initializing talents\' account list from {file}...')
     global talents
@@ -23,6 +25,7 @@ def init():
     global holo_id
     global niji_en
     global niji_exid
+    global test_talents
 
     # holoEN
     __create_dict(f'{util.get_project_dir()}/lists/holoen.txt', holo_en)
@@ -32,4 +35,8 @@ def init():
     __create_dict(f'{util.get_project_dir()}/lists/nijien.txt', niji_en)
     # nijiexID
     __create_dict(f'{util.get_project_dir()}/lists/nijiexid.txt', niji_exid)
+
+    test_talents = {
+        1390637197167038464: 'PomuRainpuff'
+    }
 

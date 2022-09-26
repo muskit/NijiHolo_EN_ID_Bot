@@ -1,5 +1,6 @@
 ## Shared utility functions.
 
+import datetime
 import os
 
 import twint
@@ -15,6 +16,12 @@ def get_project_dir():
 
 def clamp(n, smallest, largest):
     return max(smallest, min(n, largest))
+
+def datetime_to_tdate(date_time: datetime.datetime):
+    return date_time.strftime("%Y-%m-%d")
+
+def tdate_to_datetime(tdate: str):
+    return datetime.datetime.strptime("%Y-%m-%d")
 
 async def create_ttweet_image(ttweet):
     tc = TweetCapture()

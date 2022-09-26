@@ -43,24 +43,30 @@ class TalentTweet:
         )
     
     @staticmethod
-    def create_from_twint_tweet(tweet):
+    async def create_from_twint_tweet(tweet):
         # qrt
-        if tweet.quote_url != '':
-            return TalentTweet(tweet_id=tweet.id)
+        # -- COMMENTED OUT FOR TESTING PURPOSES --
+        # TODO: uncomment
+        # if tweet.quote_url != '':
+        #     api_ttweet = await TalentTweet.create_from_id(tweet.id)
+        #     return api_ttweet
 
         # MRQ (Q is guaranteed to be None)
         mentions = set()
         reply_to = None
         
         # reply_to/mentions
-        is_reply = tweet.id == int(tweet.conversation_id)
-        if is_reply:
-            reply_to = tweet.reply_to[0]
-            mentions = set(tweet.reply_to[1:])
-        mentions.add(*tweet.mentions)
+        is_reply = tweet.id != int(tweet.conversation_id)
+        mentions = set([x['id'] for x in tweet.mentions])
+        if is_reply and len(tweet.reply_to) > 0: # FIXME: QRT = is_reply and len(tweet.reply_to) == 0?
+            reply_to = tweet.reply_to[0]['id']
+            reply_others = [x['id'] for x in tweet.reply_to[1:]]
+            mentions.update(reply_others)
+            try: mentions.remove(reply_to)
+            except: pass
 
-        datetime = datetime.strptime(tweet.datetime, '%Y-%m-%d %H:%M:%S %Z')
-        return TalentTweet(tweet_id=tweet.id, author_id=tweet.user_id, date_time=datetime, mrq=(mentions, reply_to, None))
+        date_time = datetime.strptime(tweet.datetime, '%Y-%m-%d %H:%M:%S %Z')
+        return TalentTweet(tweet_id=tweet.id, author_id=tweet.user_id, date_time=date_time, mrq=(mentions, reply_to, None))
 
 
     @staticmethod
@@ -79,9 +85,9 @@ class TalentTweet:
     def __init__(self, tweet_id: int, author_id: int,date_time: datetime, mrq: tuple):
         self.tweet_id, self.author_id = tweet_id, author_id
         self.date_time = date_time
-        self.mentions = mrq[0]
-        self.reply_to = mrq[1]
-        self.quote_retweeted = mrq[2]
+        self.mentions = tuple(int(x) for x in mrq[0])
+        self.reply_to = int(mrq[1]) if mrq[1] is not None else None
+        self.quote_retweeted = int(mrq[2]) if mrq[2] is not None else None
 
         # all users involved, except for the author
         self.all_parties = {self.reply_to, self.quote_retweeted}
