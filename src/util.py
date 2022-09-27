@@ -36,7 +36,7 @@ def get_key_from_value(d, val):
 
 async def create_ttweet_image(ttweet):
     tc = TweetCapture()
-    filename = 'img.png'
+    filename = f'{get_project_dir()}/img.png'
     url = ttweet_to_url(ttweet)
     img = None
 

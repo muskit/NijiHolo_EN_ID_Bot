@@ -5,6 +5,7 @@ import pytz
 
 from twapi import *
 import talent_lists
+import util
 
 class TalentTweet:
     @staticmethod

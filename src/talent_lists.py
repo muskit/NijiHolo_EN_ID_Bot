@@ -36,7 +36,5 @@ def init():
     # nijiexID
     __create_dict(f'{util.get_project_dir()}/lists/nijiexid.txt', niji_exid)
 
-    test_talents = {
-        1390637197167038464: 'PomuRainpuff'
-    }
+    test_talents = holo_en
 

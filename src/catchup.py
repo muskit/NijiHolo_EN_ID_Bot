@@ -62,10 +62,12 @@ def get_finished_user_timestamps(queue_file):
     results = dict()
     for line in queue_file:
         tokens = line.split()
-        if len(tokens) != 3 or tokens[0][0] != '#':
+        if len(tokens) == 0: continue
+
+        if tokens[0][0] != '#':
+            print(f'{line} is our stopper!')
             # reached end of accounts list
             break
-
         if tokens[2] != '-1':
             results[int(tokens[1])] = float(tokens[2])
     return results
@@ -86,11 +88,13 @@ def get_user_timestamps_str(queue_file):
 async def get_cross_talent_tweets(queue_path):
     finished_user_timestamps = dict()
     ttweets_dict = dict()
+    posted_ttweets = set() # TODO: don't add TTweet to ttweets_dict if its id exists in posted_ttweets
 
     # Populate structures with existing data from queue.txt
     try:
         with open(queue_path, 'r') as f:
-            finished_user_timestamps = get_finished_user_timestamps(f)
+            finished_user_timestamps =  get_finished_user_timestamps(f)
+            print(finished_user_timestamps)
             
             # Get existing queued TalentTweets
             for line in f:
@@ -141,20 +145,23 @@ async def get_cross_talent_tweets(queue_path):
     
     return ttweets_dict
 
-async def process_queue(ttweets_dict: dict):
+async def process_queue(ttweets_dict: dict) -> int:
     global PROGRAM_ARGS
+    ttweets_posted = 0
 
-    if len(ttweets_dict) == 0: return
+    if len(ttweets_dict) == 0: return ttweets_posted
     
     if PROGRAM_ARGS.announce_catchup:
-        TwAPI.instance.post_tweet(text=f'Starting to catch-up through {len(ttweets_dict)} logged tweets.')
+        TwAPI.instance.post_tweet(text=f'Starting to catch up through {len(ttweets_dict)} logged tweets.')
     
     try:
         while len(ttweets_dict) > 0:
             key = list(ttweets_dict.keys())[0]
             ttweet = ttweets_dict[key]
-            await TwAPI.instance.post_ttweet(ttweet)
+            if await TwAPI.instance.post_ttweet(ttweet, is_catchup=True):
+                ttweets_posted += 1
             ttweets_dict.pop(key)
+            # TODO: add ttweet.tweet_id to some success list
     except:
         print('Unhandled error occurred while posting tweets from queue.')
         traceback.print_exc()
@@ -169,11 +176,17 @@ async def process_queue(ttweets_dict: dict):
         f.write(user_timestamps_str + '\n\n')
         for ttweet in ttweets_dict.values():
             f.write(f'{ttweet.serialize()}\n')
+    
+    return ttweets_posted
 
 async def run(program_args):
     global PROGRAM_ARGS
     PROGRAM_ARGS = program_args
     queue_path = get_queue_path()
-    ttweets_dict = await get_cross_talent_tweets(queue_path)
-    print(f'got {len(ttweets_dict)} tweets')
-    await process_queue(ttweets_dict)
+    while True:
+        ttweets_dict = await get_cross_talent_tweets(queue_path)
+        print(f'found {len(ttweets_dict)} cross-company tweets')
+        if await process_queue(ttweets_dict) == 0:
+            print('Posted no new tweets; we\'re caught up!')
+            break
+    # TODO: go to listen mode
