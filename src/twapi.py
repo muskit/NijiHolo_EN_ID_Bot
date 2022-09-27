@@ -1,6 +1,5 @@
 import asyncio
-from math import inf
-from time import time
+import datetime
 
 import tweepy
 from tweetcapture import TweetCapture
@@ -10,6 +9,7 @@ import talenttweet as tt
 import util
 
 class TwAPI:
+    tweets_fetched = 0
     instance = None
     TWEET_MEDIA_FIELDS = ['url']
     TWEET_FIELDS = ['created_at', 'in_reply_to_user_id']
@@ -61,24 +61,74 @@ class TwAPI:
             consumer_key=api_secrets.api_key(), consumer_secret=api_secrets.api_secret(),
             access_token=api_secrets.access_token(), access_token_secret=api_secrets.access_secret()
         )
+        self.api = tweepy.API(
+            auth=tweepy.OAuthHandler(
+                consumer_key=api_secrets.api_key(), consumer_secret=api_secrets.api_secret(),
+                access_token=api_secrets.access_token(), access_token_secret=api_secrets.access_secret()
+            )
+        )
     
     async def get_tweet_response(self, id, attempt = 0):
         try:
-            return TwAPI.instance.client.get_tweet(
+            twt = TwAPI.instance.client.get_tweet(
                 id,
                 media_fields=TwAPI.TWEET_MEDIA_FIELDS,
                 tweet_fields=TwAPI.TWEET_FIELDS,
                 expansions=TwAPI.TWEET_EXPANSIONS
             )
-        except tweepy.TooManyRequests:
-            print(f'[{attempt}]get_tweet_response({id}):\n\ttoo many API requests -- trying again in 1 minute...')
-            await asyncio.sleep(60)
+            TwAPI.tweets_fetched += 1
+            return twt
+        except tweepy.TooManyRequests as e:
+            wait_for = float(e.response.headers["x-rate-limit-reset"]) - datetime.datetime.now().timestamp() + 1
+            print(f'[{attempt}]\tget_tweet_response({id}):\n\thit rate limit after {TwAPI.tweets_fetched} fetches -- trying again in {wait_for} seconds...')
+            await asyncio.sleep(wait_for)
             return await self.get_tweet_response(id, attempt=attempt+1)
 
-    # Create a post that showcases given tweet and its mentions set.
-    # Try do do this without retireving Tweet data.
-    async def create_post(self, ttweet):
+    async def post_tweet(self, text, media_id=None, reply_to_tweet: int=None):
+        try:
+            tweet = self.client.create_tweet(text=text, media_ids=None if media_id == None else [media_id], in_reply_to_tweet_id=reply_to_tweet)
+            return tweet
+        except tweepy.TooManyRequests as e:
+            wait_for = float(e.response.headers["x-rate-limit-reset"]) - datetime.datetime.now().timestamp() + 1
+            print(f'\thit rate limit -- attempting to create Tweet again in {wait_for} seconds...')
+            await asyncio.sleep(wait_for)
+            return await self.post_tweet(text=text, media_ids=[media_id])
+
+    async def get_ttweet_image_media_id(self, ttweet):
         img = await util.create_ttweet_image(ttweet)
+        media = self.api.media_upload(img)
+        return media.media_id
+
+    async def post_ttweet(self, ttweet: tt.TalentTweet):
+        REPLY = '{0} replied to {1}!\n'
+        MENTION = '{0} mentioned {1}!\n'
+        QUOTE_TWEET = '{0} quote tweeted {1}!\n'
+
+        def create_text():
+            if ttweet.reply_to is not None:
+                author_username = f'@/{util.get_username_online(ttweet.author_id)}'
+                reply_username = f'@/{util.get_username_online(ttweet.reply_to)}'
+                mention_ids = set(ttweet.mentions)
+                mention_ids.add(ttweet.quote_retweeted)
+                try: mention_ids.remove(None)
+                except: pass
+                mention_usernames = [f'@/{util.get_username_online(x)}' for x in mention_ids]
+                
+                ret = REPLY.format(author_username, reply_username)
+                ret += (
+                    'mentions '
+                    f'{" ".join(mention_usernames)}'
+                    f'\n{util.ttweet_to_url(ttweet)}'
+                )
+                return ret
+        
+        img_media_id_task = asyncio.create_task(self.get_ttweet_image_media_id(ttweet))
+        text = create_text()
+        media_id = await img_media_id_task
+        twt_resp = await self.post_tweet(text)
+        twt_id = twt_resp.data['id']
+        await self.post_tweet(text='Image backup', reply_to_tweet=twt_id, media_id=media_id,)
+
 
 
         

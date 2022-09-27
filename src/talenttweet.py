@@ -1,8 +1,7 @@
-from datetime import datetime
+import datetime
 import platform
 
 import pytz
-import twint
 
 from twapi import *
 import talent_lists
@@ -15,7 +14,7 @@ class TalentTweet:
             raise ValueError('not enough tokens to reconstruct a TalentTweet')
         
         tweet_id, author_id = int(tokens[0]), int(tokens[1])
-        date_time = datetime.fromtimestamp(float(tokens[2]), tz=pytz.utc)
+        date_time = datetime.datetime.fromtimestamp(float(tokens[2]), tz=pytz.utc)
         
         mentions = set()
         reply_to = None
@@ -44,29 +43,33 @@ class TalentTweet:
     
     @staticmethod
     async def create_from_twint_tweet(tweet):
-        # qrt
-        # -- COMMENTED OUT FOR TESTING PURPOSES --
-        # TODO: uncomment
-        # if tweet.quote_url != '':
-        #     api_ttweet = await TalentTweet.create_from_id(tweet.id)
-        #     return api_ttweet
-
-        # MRQ (Q is guaranteed to be None)
+        # MRQ
         mentions = set()
         reply_to = None
-        
+        quoted_id = None
+            
         # reply_to/mentions
         is_reply = tweet.id != int(tweet.conversation_id)
         mentions = set([x['id'] for x in tweet.mentions])
-        if is_reply and len(tweet.reply_to) > 0: # FIXME: QRT = is_reply and len(tweet.reply_to) == 0?
-            reply_to = tweet.reply_to[0]['id']
+        if is_reply and len(tweet.reply_to) > 0:
+            reply_to = tweet.reply_to[0]['id'] # FIXME: QRT = is_reply and len(tweet.reply_to) == 0?
             reply_others = [x['id'] for x in tweet.reply_to[1:]]
             mentions.update(reply_others)
             try: mentions.remove(reply_to)
             except: pass
 
-        date_time = datetime.strptime(tweet.datetime, '%Y-%m-%d %H:%M:%S %Z')
-        return TalentTweet(tweet_id=tweet.id, author_id=tweet.user_id, date_time=date_time, mrq=(mentions, reply_to, None))
+        # qrt
+        if type(tweet.quote_url) == str:
+            # print(f'url: {tweet.quote_url} ({type(tweet.quote_url)})')
+            quote_tokens = tweet.quote_url.split('/')
+            if len(quote_tokens) >= 2:
+                quoted_username = quote_tokens[-2]
+                quoted_id = util.get_user_id_local(quoted_username)
+                if quoted_id == -1:
+                    quoted_id = util.get_user_id_online(quoted_username)
+
+        date_time = datetime.datetime.strptime(tweet.datetime, '%Y-%m-%d %H:%M:%S %Z')
+        return TalentTweet(tweet_id=tweet.id, author_id=tweet.user_id, date_time=date_time, mrq=(mentions, reply_to, quoted_id))
 
 
     @staticmethod
@@ -82,7 +85,7 @@ class TalentTweet:
             mrq=mrq
         )
 
-    def __init__(self, tweet_id: int, author_id: int,date_time: datetime, mrq: tuple):
+    def __init__(self, tweet_id: int, author_id: int,date_time: datetime.datetime, mrq: tuple):
         self.tweet_id, self.author_id = tweet_id, author_id
         self.date_time = date_time
         self.mentions = tuple(int(x) for x in mrq[0])
@@ -101,7 +104,7 @@ class TalentTweet:
 
     def __repr__(self) -> str:
         return (
-            f'{self.tweet_id} from {util.get_username(self.author_id)}):\n'
+            f'{self.tweet_id} from {util.get_username_local(self.author_id)}):\n'
             f'{self.get_datetime_str()}\n'
             f'{self.get_all_parties_usernames()}\n'
             f'mentions: {self.mentions}\n'
@@ -146,7 +149,7 @@ class TalentTweet:
         if len(self.all_parties) > 0:
             s = str()
             for id in self.all_parties:
-                s += f'{util.get_username(id)}, '
+                s += f'{util.get_username_local(id)}, '
             return s[0:-2]
 
         return 'none'

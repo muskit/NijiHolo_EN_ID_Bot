@@ -3,11 +3,11 @@
 import datetime
 import os
 
+import pytz
 import twint
 from tweetcapture import TweetCapture
 
 import talent_lists
-import talenttweet as tt
 
 # returns system path to this project, which is
 # up one level from this file's directory (effective path: ..../src/../).
@@ -22,6 +22,17 @@ def datetime_to_tdate(date_time: datetime.datetime):
 
 def tdate_to_datetime(tdate: str):
     return datetime.datetime.strptime("%Y-%m-%d")
+
+def timestamp_to_tdate(timestamp=None):
+    if timestamp==None:
+        timestamp = datetime.datetime.now().timestamp()
+    return datetime_to_tdate(datetime.datetime.fromtimestamp(timestamp, tz=pytz.utc))
+
+def get_key_from_value(d, val):
+    keys = [k for k, v in d.items() if v == val]
+    if keys:
+        return keys[0]
+    return None
 
 async def create_ttweet_image(ttweet):
     tc = TweetCapture()
@@ -46,10 +57,10 @@ async def create_ttweet_image(ttweet):
         return img
 
 def ttweet_to_url(ttweet):
-    username = get_username(ttweet.author_id)
+    username = get_username_online(ttweet.author_id)
     return f'https://twitter.com/{username}/status/{ttweet.tweet_id}'
 
-def get_username(user_id):
+def get_username_local(user_id):
     return talent_lists.talents.get(user_id, f'#{id}')
 
 def get_username_online(user_id):
@@ -64,3 +75,22 @@ def get_username_online(user_id):
         return user.username
     except:
         return f'#{user_id}'
+
+def get_user_id_local(username) -> int:
+    talent_usernames = list(talent_lists.talents.values())
+    for i in range(0, len(talent_usernames)):
+        if username.lower() == talent_usernames[i].lower():
+            return list(talent_lists.talents)[i]
+    
+def get_user_id_online(username) -> int:
+    c = twint.Config()
+    c.Username = username
+    c.Store_object = True
+    c.Hide_output = True
+    try:
+        twint.output.users_list.clear()
+        twint.run.Lookup(c)
+        user = twint.output.users_list[0]
+        return user.id
+    except:
+        return -1
