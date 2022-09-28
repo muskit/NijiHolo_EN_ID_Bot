@@ -142,8 +142,8 @@ cython_debug/
 # VS Code files
 .vscode
 
-# project-specific
-/secrets.ini
-/queue.txt
+# project-specific (secret.ini: can't ignore existing file?)
+secrets.ini
+queue.txt
 /img.png
 /src/img.png

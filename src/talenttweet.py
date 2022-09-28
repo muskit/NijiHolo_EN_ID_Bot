@@ -72,26 +72,43 @@ class TalentTweet:
         date_time = datetime.datetime.strptime(tweet.datetime, '%Y-%m-%d %H:%M:%S %Z')
         return TalentTweet(tweet_id=tweet.id, author_id=tweet.user_id, date_time=date_time, mrq=(mentions, reply_to, quoted_id))
 
-
     @staticmethod
-    async def create_from_id(id):
-        resp = await TwAPI.instance.get_tweet_response(id)
+    def create_from_v2api_response(resp):
         tweet = resp.data
         mrq = TwAPI.get_mrq(tweet, resp)
+        rt_target = None
+        rt_author_id = None
+
+        # check if is RT
+        if tweet.referenced_tweets is not None and len(tweet.referenced_tweets) > 0:
+            for ref in tweet.referenced_tweets:
+                if ref.type == 'retweeted':
+                    rt_target = ref.id
+                    for incl_tweet in resp.includes['tweets']:
+                        if incl_tweet.id == ref.id:
+                            rt_author_id = incl_tweet.author_id
 
         return TalentTweet(
             tweet_id=tweet.id,
             author_id=tweet.author_id,
             date_time=tweet.created_at,
-            mrq=mrq
+            mrq=mrq,
+            rt_target=rt_target,
+            rt_author_id=rt_author_id
         )
 
-    def __init__(self, tweet_id: int, author_id: int,date_time: datetime.datetime, mrq: tuple):
+    @staticmethod
+    async def create_from_id(id):
+        resp = await TwAPI.instance.get_tweet_response(id)
+        return TalentTweet.create_from_v2api_response(resp)
+
+    def __init__(self, tweet_id: int, author_id: int, date_time: datetime.datetime, mrq: tuple, rt_target: int=None, rt_author_id: int=None):
         self.tweet_id, self.author_id = tweet_id, author_id
         self.date_time = date_time
         self.mentions = tuple(int(x) for x in mrq[0])
         self.reply_to = int(mrq[1]) if mrq[1] is not None else None
         self.quote_retweeted = int(mrq[2]) if mrq[2] is not None else None
+        self.rt_target, self.rt_author_id = rt_target, rt_author_id
 
         # all users involved, except for the author
         self.all_parties = {self.reply_to, self.quote_retweeted}

@@ -3,7 +3,6 @@ import datetime
 import traceback
 
 import tweepy
-import twint
 
 import api_secrets
 import talenttweet as tt
@@ -13,7 +12,7 @@ class TwAPI:
     tweets_fetched = 0
     instance = None
     TWEET_MEDIA_FIELDS = ['url']
-    TWEET_FIELDS = ['created_at', 'in_reply_to_user_id']
+    TWEET_FIELDS = ['created_at', 'in_reply_to_user_id', 'referenced_tweets']
     TWEET_EXPANSIONS = ['entities.mentions.username', 'referenced_tweets.id.author_id']
     
     # Returns a tuple of user IDs:(reply_to, qrt, {mentions})
@@ -171,10 +170,12 @@ class TwAPI:
 
         REPLY = '{0} replied to {1}!\n'
         QUOTE_TWEET = '{0} quote tweeted {1}!\n'
-        MENTION = '{0} tweeted!\n'
+        TWEET = '{0} tweeted!\n'
+        RETWEET = '{0} retweeted {1}!\n'
 
         def create_text():
-            author_username = f'@/{util.get_username_online(ttweet.author_id)}'
+            author_username = f'@/{util.get_username_local(ttweet.author_id)}'
+            mention_ids = set()
             ret = str()
             if is_catchup:
                 # ret += '[catch-up tweet]\n'
@@ -182,8 +183,11 @@ class TwAPI:
                 pass
 
             # Tweet types
-            if ttweet.reply_to is not None: # reply (w/ qrt; push it into mentions)
-                reply_username = f'@/{util.get_username_online(ttweet.reply_to)}'
+            if ttweet.rt_target is not None: # standalone tweet
+                ret += RETWEET.format(author_username, f'@/{util.get_username(ttweet.rt_author_id)}')
+                mention_ids.clear()
+            elif ttweet.reply_to is not None: # reply (w/ qrt; push it into mentions)
+                reply_username = f'@/{util.get_username_local(ttweet.reply_to)}'
                 ret += REPLY.format(author_username, reply_username)
                 
                 mention_ids = set(ttweet.mentions)
@@ -191,16 +195,16 @@ class TwAPI:
                 try: mention_ids.remove(None)
                 except: pass
             elif ttweet.quote_retweeted is not None: # standalone qrt
-                quoted_username = f'@/{util.get_username_online(ttweet.quote_retweeted)}'
+                quoted_username = f'@/{util.get_username_local(ttweet.quote_retweeted)}'
                 ret += QUOTE_TWEET.format(author_username, quoted_username)
             elif len(ttweet.mentions) > 0: # standalone tweet w/ mentions
-                ret += MENTION.format(author_username)
+                ret += TWEET.format(author_username)
             else:
                 raise ValueError(f'TalentTweet {ttweet.tweet_id} has insufficient other parties')
 
             # mention line
             if len(mention_ids) > 0:
-                mention_usernames = [f'@/{util.get_username_online(x)}' for x in mention_ids]
+                mention_usernames = [f'@/{util.get_username_local(x)}' for x in mention_ids]
                 ret += (
                     'mentioning '
                     f'{" ".join(mention_usernames)}\n'
@@ -210,11 +214,12 @@ class TwAPI:
         
         img_media_id_task = asyncio.create_task(self.get_ttweet_image_media_id(ttweet))
         text = create_text()
-        media_id = await img_media_id_task
         try:
             print('posting main tweet')
             twt_resp = await self.post_tweet(text)
             twt_id = twt_resp.data['id']
+            print('waiting on reply img')
+            media_id = await img_media_id_task
             print('posting reply tweet')
             await self.post_tweet(reply_to_tweet=twt_id, media_id=media_id,)
             print('successfully posted ttweet!')

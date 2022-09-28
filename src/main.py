@@ -51,6 +51,7 @@ async def async_main():
         case 'c' | 'catchup':
             print('RUNNING IN CATCH-UP MODE\n')
             await catchup.run(PROGRAM_ARGS)
+            await listen.run()
         case 'd' | 'delete-all':
             print('WARNING: SELF-DESTRUCT MODE')
             await self_destruct()

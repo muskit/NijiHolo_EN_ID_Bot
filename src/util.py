@@ -1,10 +1,12 @@
 ## Shared utility functions.
 
-import datetime
 import os
+import traceback
+import datetime
 
 import pytz
 import twint
+import twapi
 from tweetcapture import TweetCapture
 
 import talent_lists
@@ -60,21 +62,40 @@ def ttweet_to_url(ttweet):
     username = get_username_online(ttweet.author_id)
     return f'https://twitter.com/{username}/status/{ttweet.tweet_id}'
 
-def get_username_local(user_id):
-    return talent_lists.talents.get(user_id, f'#{id}')
+def get_username_local(id):
+    return talent_lists.talents.get(id, f'{id}')
 
-def get_username_online(user_id):
-    c = twint.Config()
-    c.User_id = user_id
-    c.Store_object = True
-    c.Hide_output = True
+# twint
+# May not work with short user IDs (ie. 1354241437)
+# def get_username_online(id, default=None):
+#     c = twint.Config()
+#     c.User_id = id
+#     c.Store_object = True
+#     c.Hide_output = True
+#     try:
+#         twint.output.users_list.clear()
+#         twint.run.Lookup(c)
+#         user = twint.output.users_list[0]
+#         return user.username
+#     except:
+#         return str(default) if default is not None else f'{id}'
+
+# API v2 (tweepy)
+# Short user IDs (ie. 1354241437) apparently don't work with twint
+def get_username_online(id, default=None):
     try:
-        twint.output.users_list.clear()
-        twint.run.Lookup(c)
-        user = twint.output.users_list[0]
-        return user.username
+        resp = twapi.TwAPI.instance.client.get_user(id=id)
+        return resp.data.username
     except:
-        return f'#{user_id}'
+        print(f'Unhandled error retrieving username for {id}!')
+        traceback.print_exc()
+        return str(default) if default is not None else f'{id}'
+
+## Attempt to pull username from local; pull from online if doesn't exist.
+def get_username(id):
+    ret = talent_lists.talents.get(id, None)
+    if ret == None:
+        return get_username_online(id)
 
 def get_user_id_local(username) -> int:
     talent_usernames = list(talent_lists.talents.values())
