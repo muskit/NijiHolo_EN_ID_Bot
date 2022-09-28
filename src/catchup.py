@@ -115,7 +115,7 @@ async def get_cross_talent_tweets(queue_path):
         print('Pulling tweets from online!')
         try:
             for i, (talent_id, talent_username) in enumerate(talent_lists.talents.items()):
-                print(f'[{i+1}/{len(talent_lists.talents)}]{util.get_username(talent_id)}----------------------------')
+                print(f'[{i+1}/{len(talent_lists.talents)}] {talent_username}-----------------------------------')
                 try:
                     # tweets = get_user_tweets(talent_id, since_timestamp=1663698621) # shorten test runs
                     tweets = get_user_tweets(talent_id, since_timestamp=finished_user_timestamps.get(talent_id, None))

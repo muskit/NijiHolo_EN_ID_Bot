@@ -53,6 +53,7 @@ async def create_ttweet_image(ttweet):
         )
     except:
         print('unable to create tweet image')
+        traceback.print_exc()
         return None
     else:
         print(f'successfully saved {img}')
