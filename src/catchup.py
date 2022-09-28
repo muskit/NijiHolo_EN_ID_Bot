@@ -6,6 +6,8 @@
 
 import traceback
 import datetime
+import asyncio
+import shutil
 
 import twint
 
@@ -159,6 +161,8 @@ async def process_queue(ttweets_dict: dict) -> int:
             ttweet = ttweets_dict[key]
             if await TwAPI.instance.post_ttweet(ttweet, is_catchup=True):
                 ttweets_posted += 1
+                print('resting for 60s...')
+                await asyncio.sleep(60)
             ttweets_dict.pop(key)
             # TODO: add ttweet.tweet_id to some success list
     except:
@@ -184,14 +188,28 @@ async def run(program_args):
     global PROGRAM_ARGS
     global safe_to_post_tweets
     PROGRAM_ARGS = program_args
+
+    # in case we we experience failure and we're left with blank queue.txt
+    # TODO: create TweetQueue class to organize file IO better; move all backup operations to there
+    queue_backup = os.path.join(util.get_project_dir(), 'queue_in_progress.txt')
     queue_path = get_queue_path()
+
+    if os.path.exists(queue_backup):
+        shutil.copyfile(queue_backup, queue_path)
+    else:
+        shutil.copyfile(queue_path, queue_backup)
+
+    ret = None
+
     while True:
         ttweets_dict = await get_cross_talent_tweets(queue_path)
         print(f'found {len(ttweets_dict)} cross-company tweets')
         if safe_to_post_tweets:
             if await process_queue(ttweets_dict) == 0:
                 print('Posted no new tweets; we\'re caught up!')
-                return True
+            os.remove(queue_backup) # keep updated queue
+            return True
         else:
             print('Tweets were not retrieved cleanly.')
+            os.remove(queue_path)  # keep backup queue
             return False

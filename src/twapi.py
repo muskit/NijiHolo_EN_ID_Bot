@@ -212,14 +212,13 @@ class TwAPI:
             ret += f'\n{util.ttweet_to_url(ttweet)}'
             return ret
         
-        img_media_id_task = asyncio.create_task(self.get_ttweet_image_media_id(ttweet))
         text = create_text()
         try:
             print('posting main tweet')
             twt_resp = await self.post_tweet(text)
             twt_id = twt_resp.data['id']
-            print('waiting on reply img')
-            media_id = await img_media_id_task
+            print('creating reply img')
+            media_id = await self.get_ttweet_image_media_id(ttweet)
             print('posting reply tweet')
             await self.post_tweet(reply_to_tweet=twt_id, media_id=media_id,)
             print('successfully posted ttweet!')
