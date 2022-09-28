@@ -111,9 +111,7 @@ async def get_cross_talent_tweets(queue_path):
     with open(queue_path, 'w') as f:
         print('Pulling tweets from online!')
         try:
-            print('TODO: using test_talents')
-            for talent_id in talent_lists.test_talents:
-            # for talent_id in talent_lists.talents:
+            for talent_id in talent_lists.talents:
                 if talent_id not in finished_user_timestamps or \
                     finished_user_timestamps[talent_id] < datetime.datetime.now().timestamp():
                     try:
@@ -189,4 +187,3 @@ async def run(program_args):
         if await process_queue(ttweets_dict) == 0:
             print('Posted no new tweets; we\'re caught up!')
             break
-    # TODO: go to listen mode

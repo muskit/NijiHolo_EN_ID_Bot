@@ -29,7 +29,7 @@ def init_argparse():
     return p
 
 def command_line():
-    # TODO: implement command line mode for manually controlling the bot
+    # TODO (extra): implement command line mode for manually controlling the bot
     print('Shell coming soon. For now, here\'s a Python interpretor.')
     code.interact(local=globals())
     pass

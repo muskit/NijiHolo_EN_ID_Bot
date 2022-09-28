@@ -14,12 +14,12 @@ The bot will be runnable in three modes:
 ## Roadmap
 * ~~Read past tweets of members from both companies~~
 * ~~Create screenshot of tweet~~
-* Track tweets in queue files
-* Post tweets along with screenshot of tweet
+* ~~Track tweets in queue files~~
+* ~~Post tweets along with screenshot of tweet~~
     * Include screenshot of tweet being replied to?
+* ~~Combine image with quote tweet~~
+* ~~Don't tweet already-existing tweets (check our past quote tweets; might be saved in a file for quicker access)~~
 * Track posted tweets in a history file
-* Combine image with quote tweet
-* Don't tweet already-existing tweets (check our past quote tweets; might be saved in a file for quicker access)
 
 ## Notes
 * Tweets should only occur if involved parties are cross-company
