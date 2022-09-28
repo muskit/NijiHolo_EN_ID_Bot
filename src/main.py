@@ -47,7 +47,7 @@ async def async_main():
     match PROGRAM_ARGS.mode.lower():
         case 'l' | 'listen':
             print('RUNNING IN LISTEN MODE\n')
-            listen.run()
+            await listen.run()
         case 'c' | 'catchup':
             print('RUNNING IN CATCH-UP MODE\n')
             await catchup.run(PROGRAM_ARGS)

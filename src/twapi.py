@@ -171,15 +171,17 @@ class TwAPI:
 
         REPLY = '{0} replied to {1}!\n'
         QUOTE_TWEET = '{0} quote tweeted {1}!\n'
-        MENTION = '{0} tweeted with '
+        MENTION = '{0} tweeted!\n'
 
         def create_text():
             author_username = f'@/{util.get_username_online(ttweet.author_id)}'
             ret = str()
             if is_catchup:
                 # ret += '[catch-up tweet]\n'
+                ret += f'{ttweet.get_datetime_str()}\n'
                 pass
-            ret += f'{ttweet.get_datetime_str()}\n'
+
+            # Tweet types
             if ttweet.reply_to is not None: # reply (w/ qrt; push it into mentions)
                 reply_username = f'@/{util.get_username_online(ttweet.reply_to)}'
                 ret += REPLY.format(author_username, reply_username)
@@ -200,7 +202,7 @@ class TwAPI:
             if len(mention_ids) > 0:
                 mention_usernames = [f'@/{util.get_username_online(x)}' for x in mention_ids]
                 ret += (
-                    'mentions '
+                    'mentioning '
                     f'{" ".join(mention_usernames)}\n'
                 )
             ret += f'\n{util.ttweet_to_url(ttweet)}'
