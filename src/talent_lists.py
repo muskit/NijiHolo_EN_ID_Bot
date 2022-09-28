@@ -16,7 +16,6 @@ def __create_dict(file, _dict):
             words = line.split()
             if len(words) == 2 and line[0] != '#':
                 name, id = line.split()
-                talents[int(id)] = name
                 name = util.get_username_online(id, default=name) # attempt to get updated name
                 talents[int(id)] = name
                 _dict[int(id)] = name

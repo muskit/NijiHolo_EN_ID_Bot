@@ -15,6 +15,7 @@ from twapi import TwAPI
 import talenttweet as tt
 
 PROGRAM_ARGS = None
+safe_to_post_tweets = True
 
 def write_user_timestamp(user_id, file, timestamp = None, error = False):
     if timestamp is None:
@@ -42,15 +43,16 @@ def get_user_tweets(id, since_timestamp=None, limit=None):
     c.Hide_output = True
     c.Since = '' if since_timestamp == None else util.timestamp_to_tdate(since_timestamp)
     
-    user_str = f'{util.get_username_local(id)}'
+    user_str = f'@{util.get_username_local(id)}'
     print(f'Scraping tweets from {user_str} since {"forever ago" if c.Since == "" else c.Since}...')
     try:
         twint.run.Search(c)
     except:
         print(f'Had trouble getting tweets from {user_str}')
+        traceback.print_exc()
 
     for twt in tweets:
-        if twt.quote_url != '':
+        if type(twt.quote_url) is str and twt.quote_url != '':
             qrt_count += 1
     
     print(f'Scraped {len(tweets)} tweets, {qrt_count} of which are quote tweets.')
@@ -89,13 +91,14 @@ async def get_cross_talent_tweets(queue_path):
     finished_user_timestamps = dict()
     ttweets_dict = dict()
     posted_ttweets = set() # TODO: don't add TTweet to ttweets_dict if its id exists in posted_ttweets
+    global safe_to_post_tweets
 
     # Populate structures with existing data from queue.txt
     try:
         with open(queue_path, 'r') as f:
             finished_user_timestamps =  get_finished_user_timestamps(f)
-            print(finished_user_timestamps)
-            
+        
+        with open(queue_path, 'r') as f: # reset seek head
             # Get existing queued TalentTweets
             for line in f:
                 tokens = line.split()
@@ -107,30 +110,27 @@ async def get_cross_talent_tweets(queue_path):
     except FileNotFoundError:
         print('queue.txt not found.')
 
-    # Pull tweets from twint
+    # Begin getting tweets from online
     with open(queue_path, 'w') as f:
         print('Pulling tweets from online!')
         try:
-            for talent_id in talent_lists.talents:
-                if talent_id not in finished_user_timestamps or \
-                    finished_user_timestamps[talent_id] < datetime.datetime.now().timestamp():
-                    try:
-                        # tweets = get_user_tweets(talent_id, since_timestamp=1663698621) # shorten test runs
-                        tweets = get_user_tweets(talent_id, since_timestamp=finished_user_timestamps.get(talent_id, None))
-                        for tweet in tweets:
-                            if tweet.id not in ttweets_dict:
-                                ttweet = await tt.TalentTweet.create_from_twint_tweet(tweet)
-                                if ttweet.is_cross_company():
-                                    ttweets_dict[ttweet.tweet_id] = ttweet
-                    except:
-                        print('Error occurred processing tweet data.')
-                        print(traceback.format_exc())
-                        write_user_timestamp(user_id=talent_id, file=f, error=True)
-                    else:
-                        write_user_timestamp(user_id=talent_id, file=f)
+            for i, (talent_id, talent_username) in enumerate(talent_lists.talents.items()):
+                print(f'[{i+1}/{len(talent_lists.talents)}]{util.get_username(talent_id)}----------------------------')
+                try:
+                    # tweets = get_user_tweets(talent_id, since_timestamp=1663698621) # shorten test runs
+                    tweets = get_user_tweets(talent_id, since_timestamp=finished_user_timestamps.get(talent_id, None))
+                    for tweet in tweets:
+                        if tweet.id not in ttweets_dict:
+                            ttweet = await tt.TalentTweet.create_from_twint_tweet(tweet)
+                            if ttweet.is_cross_company():
+                                ttweets_dict[ttweet.tweet_id] = ttweet
+                except:
+                    print('Error occurred processing tweet data.')
+                    safe_to_post_tweets = False
+                    print(traceback.format_exc())
+                    write_user_timestamp(user_id=talent_id, file=f, error=True)
                 else:
-                    print(f'Skipping already completed {util.get_username_local(talent_id)}')
-                    write_user_timestamp(user_id=talent_id, file=f, timestamp=finished_user_timestamps[talent_id])
+                    write_user_timestamp(user_id=talent_id, file=f)
             f.write('\n')
             ttweets_dict = dict(sorted(ttweets_dict.items()))
             for ttweet in ttweets_dict.values():
@@ -139,10 +139,11 @@ async def get_cross_talent_tweets(queue_path):
             print('Unhandled error occurred while pulling tweets.')
             traceback.print_exc()
             print('Saving queue.txt and exiting.')
-            exit(1)
+            safe_to_post_tweets = False
     
     return ttweets_dict
 
+# Return number of TalentTweets successfully posted
 async def process_queue(ttweets_dict: dict) -> int:
     global PROGRAM_ARGS
     ttweets_posted = 0
@@ -177,13 +178,20 @@ async def process_queue(ttweets_dict: dict) -> int:
     
     return ttweets_posted
 
+# return True = no problems
+# return False = issue occurred where we couldn't post all past tweets properly
 async def run(program_args):
     global PROGRAM_ARGS
+    global safe_to_post_tweets
     PROGRAM_ARGS = program_args
     queue_path = get_queue_path()
     while True:
         ttweets_dict = await get_cross_talent_tweets(queue_path)
         print(f'found {len(ttweets_dict)} cross-company tweets')
-        if await process_queue(ttweets_dict) == 0:
-            print('Posted no new tweets; we\'re caught up!')
-            break
+        if safe_to_post_tweets:
+            if await process_queue(ttweets_dict) == 0:
+                print('Posted no new tweets; we\'re caught up!')
+                return True
+        else:
+            print('Tweets were not retrieved cleanly.')
+            return False
