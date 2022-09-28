@@ -59,9 +59,12 @@ async def create_ttweet_image(ttweet):
         print(f'successfully saved {img}')
         return img
 
+def get_tweet_url(id, username):
+    return f'https://twitter.com/{username}/status/{id}'
+
 def ttweet_to_url(ttweet):
-    username = get_username_online(ttweet.author_id)
-    return f'https://twitter.com/{username}/status/{ttweet.tweet_id}'
+    username = get_username(ttweet.author_id)
+    return get_tweet_url(ttweet.tweet_id, username)
 
 def get_username_local(id):
     return talent_lists.talents.get(id, f'{id}')
@@ -90,13 +93,14 @@ def get_username_online(id, default=None):
     except:
         print(f'Unhandled error retrieving username for {id}!')
         traceback.print_exc()
-        return str(default) if default is not None else f'{id}'
+        return str(default) if default is not None else f'id:{id}'
 
 ## Attempt to pull username from local; pull from online if doesn't exist.
 def get_username(id):
     ret = talent_lists.talents.get(id, None)
     if ret == None:
         return get_username_online(id)
+    return ret
 
 def get_user_id_local(username) -> int:
     talent_usernames = list(talent_lists.talents.values())

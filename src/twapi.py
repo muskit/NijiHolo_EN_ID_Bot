@@ -150,15 +150,15 @@ class TwAPI:
             await asyncio.sleep(wait_for)
             return await self.get_tweet_response(id, attempt=attempt+1)
 
-    async def post_tweet(self, text='', media_id=None, reply_to_tweet: int=None):
+    async def post_tweet(self, text='', media_ids: list=None, reply_to_tweet: int=None):
         try:
-            tweet = self.client.create_tweet(text=text, media_ids=None if media_id == None else [media_id], in_reply_to_tweet_id=reply_to_tweet)
+            tweet = self.client.create_tweet(text=text, media_ids=None if media_ids == None else media_ids, in_reply_to_tweet_id=reply_to_tweet)
             return tweet
         except tweepy.TooManyRequests as e:
             wait_for = float(e.response.headers["x-rate-limit-reset"]) - datetime.datetime.now().timestamp() + 1
             print(f'\thit rate limit -- attempting to create Tweet again in {wait_for} seconds...')
             await asyncio.sleep(wait_for)
-            return await self.post_tweet(text=text, media_id=media_id, reply_to_tweet=reply_to_tweet)
+            return await self.post_tweet(text=text, media_ids=media_ids, reply_to_tweet=reply_to_tweet)
 
     async def get_ttweet_image_media_id(self, ttweet):
         img = await util.create_ttweet_image(ttweet)
@@ -218,9 +218,12 @@ class TwAPI:
             twt_resp = await self.post_tweet(text)
             twt_id = twt_resp.data['id']
             print('creating reply img')
-            media_id = await self.get_ttweet_image_media_id(ttweet)
+            media_ids = [await self.get_ttweet_image_media_id(ttweet)]
+            # if ttweet.reply_to is not None:
+                # re_ttweet = tt.TalentTweet(tweet_id=ttweet.reply_to, author_id=)
+                # media_ids.insert(0, await self.get_ttweet_image_media_id())
             print('posting reply tweet')
-            await self.post_tweet(reply_to_tweet=twt_id, media_id=media_id,)
+            await self.post_tweet(reply_to_tweet=twt_id, media_ids=media_ids,)
             print('successfully posted ttweet!')
             return True
         except tweepy.Forbidden as e:

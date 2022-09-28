@@ -145,10 +145,13 @@ async def get_cross_talent_tweets(queue_path):
     
     return ttweets_dict
 
-# Return number of TalentTweets successfully posted
-async def process_queue(ttweets_dict: dict) -> int:
+# return False = errored or we posted at least one ttweet
+# return True = we didn't post a single ttweet
+async def process_queue(ttweets_dict: dict) -> bool:
     global PROGRAM_ARGS
+    WAIT_TIME = 30
     ttweets_posted = 0
+    errored = False
 
     if len(ttweets_dict) == 0: return ttweets_posted
     
@@ -161,12 +164,13 @@ async def process_queue(ttweets_dict: dict) -> int:
             ttweet = ttweets_dict[key]
             if await TwAPI.instance.post_ttweet(ttweet, is_catchup=True):
                 ttweets_posted += 1
-                print('resting for 60s...')
-                await asyncio.sleep(60)
+                print(f'resting for {WAIT_TIME}s...')
+                await asyncio.sleep(WAIT_TIME)
             ttweets_dict.pop(key)
             # TODO: add ttweet.tweet_id to some success list
     except:
         print('Unhandled error occurred while posting tweets from queue.')
+        errored = True
         traceback.print_exc()
     else:
         if PROGRAM_ARGS.announce_catchup:
@@ -180,7 +184,9 @@ async def process_queue(ttweets_dict: dict) -> int:
         for ttweet in ttweets_dict.values():
             f.write(f'{ttweet.serialize()}\n')
     
-    return ttweets_posted
+    if errored or ttweets_posted > 0:
+        return False
+    return True
 
 # return True = no problems
 # return False = issue occurred where we couldn't post all past tweets properly
@@ -195,8 +201,10 @@ async def run(program_args):
     queue_path = get_queue_path()
 
     if os.path.exists(queue_backup):
+        print('Found old backup queue! We errored in the previous run.')
         shutil.copyfile(queue_backup, queue_path)
     else:
+        print('Creating backup queue...')
         shutil.copyfile(queue_path, queue_backup)
 
     ret = None
@@ -204,12 +212,17 @@ async def run(program_args):
     while True:
         ttweets_dict = await get_cross_talent_tweets(queue_path)
         print(f'found {len(ttweets_dict)} cross-company tweets')
-        if safe_to_post_tweets:
-            if await process_queue(ttweets_dict) == 0:
-                print('Posted no new tweets; we\'re caught up!')
-            os.remove(queue_backup) # keep updated queue
-            return True
-        else:
-            print('Tweets were not retrieved cleanly.')
-            os.remove(queue_path)  # keep backup queue
+        try:
+            if safe_to_post_tweets:
+                os.remove(queue_backup) # keep updated queue
+                if await process_queue(ttweets_dict):
+                    print('Posted no new tweets; we\'re caught up!')
+                    return True
+            else:
+                print('Tweets were not retrieved cleanly.')
+                # os.remove(queue_path)  # keep backup queue
+                return False
+        except:
+            print('Unhandled error occurred while running catch up in posting phase.')
+            traceback.print_exc()
             return False
