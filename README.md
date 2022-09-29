@@ -9,7 +9,7 @@ The bot will be runnable in three modes:
 * Catch-up (`c`): intended to run only once, scan all accounts for cross-company tweets and post them. Terminate when done posting all.
 * Listen (`l`): post any new tweets that come up if it's cross-company
     * may implement short-term catch-up function
-* Command-line: TBA
+* Command-line (`cmd`): an interactive mode for manual control (TBA; currently drops into Python interpretor)
 
 ## Roadmap
 * ~~Read past tweets of members from both companies~~
