@@ -220,6 +220,8 @@ class TwAPI:
         
         text = create_text()
         try:
+            # print('creating reply img')
+            # media_ids = [await self.get_ttweet_image_media_id(ttweet)]
             print('posting main tweet')
             twt_resp = await self.post_tweet(text)
             twt_id = twt_resp.data['id']

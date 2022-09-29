@@ -45,23 +45,39 @@ async def async_main():
     global PROGRAM_ARGS
 
     ## Determine running mode
-    match PROGRAM_ARGS.mode.lower():
-        case 'l' | 'listen':
-            print('RUNNING IN LISTEN MODE\n')
+    # match PROGRAM_ARGS.mode.lower():
+        # case 'l' | 'listen':
+        #     print('RUNNING IN LISTEN MODE\n')
+        #     await listen.run()
+        # case 'c' | 'catchup':
+        #     print('RUNNING IN CATCH-UP MODE\n')
+        #     if await catchup.run(PROGRAM_ARGS) and PROGRAM_ARGS.auto_listen:
+        #         print('CATCH-UP MODE DONE, GOING INTO LISTEN MODE')
+        #         await listen.run()
+        # case 'd' | 'delete-all':
+        #     print('WARNING: SELF-DESTRUCT MODE')
+        #     await self_destruct()
+        # case 'cmd':
+        #     command_line()
+        # case _:
+        #     print('\ninvalid mode. run with no arguments or "-h" for help page, including mode list.')
+        #     return
+    mode = PROGRAM_ARGS.mode.lower()
+    if mode in ['l', 'listen']:
+        print('RUNNING IN LISTEN MODE')
+        await listen.run()
+    elif mode in ['c', 'catchup']:
+        print('RUNNING IN CATCH UP MODE')
+        if await catchup.run(PROGRAM_ARGS) and PROGRAM_ARGS.auto_listen:
+            print('CATCH UP MODE DONE, GOING INTO LISTEN MODE')
             await listen.run()
-        case 'c' | 'catchup':
-            print('RUNNING IN CATCH-UP MODE\n')
-            if await catchup.run(PROGRAM_ARGS) and PROGRAM_ARGS.auto_listen:
-                print('CATCH-UP MODE DONE, GOING INTO LISTEN MODE')
-                await listen.run()
-        case 'd' | 'delete-all':
-            print('WARNING: SELF-DESTRUCT MODE')
-            await self_destruct()
-        case 'cmd':
-            command_line()
-        case _:
-            print('\ninvalid mode. run with no arguments or "-h" for help page, including mode list.')
-            return
+    elif mode in ['d', 'delete-all']:
+        print('WARNING: SELF-DESTRUCT MODE')
+        await self_destruct()
+    elif mode == 'cmd':
+        command_line()
+    else:
+        print('\ninvalid mode. run with no arguments or -h for help and modes')
 
 def main():
     global PROGRAM_ARGS
