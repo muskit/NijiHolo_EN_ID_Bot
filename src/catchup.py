@@ -98,7 +98,7 @@ async def process_queue() -> bool:
     queue = ttq.TalentTweetQueue.instance
     queued_ttweets_count = len(queue.ttweets_dict)
 
-    if len(queued_ttweets_count) == 0: return ttweets_posted
+    if queued_ttweets_count == 0: return ttweets_posted
     
     if PROGRAM_ARGS.announce_catchup:
         TwAPI.instance.post_tweet(text=f'Starting to catch up through {queued_ttweets_count} logged tweets.')
