@@ -1,4 +1,4 @@
-# NijiHolo_EN_ID_Bot
+# NijiHolo EN/ID Bot
 *Twitter bot that follows interactions between Nijisanji EN/ID and hololive EN/ID members.*  
 ...because some folks are that desperate. Like me!
 
