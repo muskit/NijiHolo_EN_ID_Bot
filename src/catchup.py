@@ -100,7 +100,7 @@ async def process_queue() -> bool:
     if len(queue.ttweets_dict) == 0: return ttweets_posted
     
     if PROGRAM_ARGS.announce_catchup:
-        TwAPI.instance.post_tweet(text=f'Starting to catch up through {len(ttweets_dict)} logged tweets.')
+        TwAPI.instance.post_tweet(text=f'Starting to catch up through {len(queue.ttweets_dict)} logged tweets.')
     
     try:
         while len(queue.ttweets_dict) > 0:
