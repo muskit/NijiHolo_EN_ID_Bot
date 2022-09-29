@@ -25,6 +25,7 @@ def init_argparse():
         help=MODES_HELP_STR)
     p.add_argument('--show-tokens', action='store_true', help='[DO NOT USE IN PUBLIC SETTING] print stored tokens from secrets.ini')
     p.add_argument('--announce-catchup', action='store_true', help='In catch-up mode, post a tweet announcing catch-up mode.')
+    p.add_argument('--auto-listen', action='store_true', help='In catch-up mode, transition to listen mode after successfuly catching up.')
     p.add_argument('--no-delay', action='store_true', help='In self-destruct mode, clear tweets without safety waiting.')
     return p
 
@@ -50,7 +51,7 @@ async def async_main():
             await listen.run()
         case 'c' | 'catchup':
             print('RUNNING IN CATCH-UP MODE\n')
-            if await catchup.run(PROGRAM_ARGS):
+            if await catchup.run(PROGRAM_ARGS) and PROGRAM_ARGS.auto_listen:
                 print('CATCH-UP MODE DONE, GOING INTO LISTEN MODE')
                 await listen.run()
         case 'd' | 'delete-all':

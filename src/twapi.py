@@ -67,7 +67,11 @@ class TwAPI:
                 access_token=api_secrets.access_token(), access_token_secret=api_secrets.access_secret()
             )
         )
-        self.me = self.client.get_me().data
+        try:
+            self.me = self.client.get_me().data
+        except Exception as e:
+            print('Did you setup secrets.ini?')
+            raise e
         print(f'Assuming the account of @{self.me.data["username"]} ({self.me["id"]})')
     
     ## ---[COMMENT OUT WHEN NOT IN USE]---
@@ -165,6 +169,8 @@ class TwAPI:
         media = self.api.media_upload(img)
         return media.media_id
 
+    # return True = successfully posted a single ttweet
+    # return False = did not post ttweet (duplicate)
     async def post_ttweet(self, ttweet: tt.TalentTweet, is_catchup=False):
         print(f'------{ttweet.tweet_id} ({util.get_username_local(ttweet.author_id)})------')
 

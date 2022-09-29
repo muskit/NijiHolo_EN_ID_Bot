@@ -4,6 +4,7 @@ import os
 import traceback
 import datetime
 
+import tweepy
 import pytz
 import twint
 import twapi
@@ -15,6 +16,12 @@ import talent_lists
 # up one level from this file's directory (effective path: ..../src/../).
 def get_project_dir():
     return os.path.join(os.path.dirname(__file__), os.pardir)
+
+def get_queue_path():
+    return f'{get_project_dir()}/queue.txt'
+
+def get_queue_backup_path():
+    return f'{get_project_dir()}/_queue_backup.txt'
 
 def clamp(n, smallest, largest):
     return max(smallest, min(n, largest))
@@ -29,6 +36,9 @@ def timestamp_to_tdate(timestamp=None):
     if timestamp==None:
         timestamp = datetime.datetime.now().timestamp()
     return datetime_to_tdate(datetime.datetime.fromtimestamp(timestamp, tz=pytz.utc))
+
+def get_current_timestamp():
+    return datetime.datetime.now().timestamp()
 
 def get_key_from_value(d, val):
     keys = [k for k, v in d.items() if v == val]
@@ -90,6 +100,8 @@ def get_username_online(id, default=None):
     try:
         resp = twapi.TwAPI.instance.client.get_user(id=id)
         return resp.data.username
+    except tweepy.TooManyRequests:
+        return str(default) if default is not None else f'id:{id}'
     except:
         print(f'Unhandled error retrieving username for {id}!')
         traceback.print_exc()
