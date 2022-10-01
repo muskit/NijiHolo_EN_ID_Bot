@@ -10,16 +10,14 @@ import api_secrets
 import talent_lists as tl
 
 def on_response(resp):
-    try:
-        ttweet = TalentTweet.create_from_v2api_response(resp)
-    except ValueError as e:
-        if "insufficient other parties" in str(e):
-            print('Tweet has no other parties, probably not a cross-company interaction.')
-            return
+    id = resp.data.id
+    ttweet = TalentTweet.create_from_v2api_response(resp)
         
     if ttweet.is_cross_company():
-        print('Tweet is cross-company! Creating post...')
+        print(f'Tweet {id} is cross-company! Creating post...')
         asyncio.run(TwAPI.instance.post_ttweet(ttweet))
+    else:
+        print(f'Tweet {id} is not cross-company.')
 
 def run():
     sc = tweepy.StreamingClient(api_secrets.bearer_token())

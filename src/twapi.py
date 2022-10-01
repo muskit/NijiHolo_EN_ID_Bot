@@ -1,4 +1,3 @@
-import asyncio
 import datetime
 import traceback
 
@@ -48,6 +47,8 @@ class TwAPI:
 
         try:
             mentions.remove(reply_to)
+        except: pass
+        try:
             mentions.remove(qrt)
         except: pass
         
