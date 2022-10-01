@@ -174,43 +174,45 @@ class TwAPI:
     async def post_ttweet(self, ttweet: tt.TalentTweet, is_catchup=False):
         print(f'------{ttweet.tweet_id} ({util.get_username_local(ttweet.author_id)})------')
 
-        REPLY = '{0} replied to {1}!\n'
-        QUOTE_TWEET = '{0} quote tweeted {1}!\n'
-        TWEET = '{0} tweeted!\n'
-        RETWEET = '{0} retweeted {1}!\n'
+        REPLY = '{0} {1}replied to {2}!\n'
+        QUOTE_TWEET = '{0} {1}quote tweeted {2}!\n'
+        TWEET = '{0} {1}tweeted!\n'
+        RETWEET = '{0} {1}retweeted {2}!\n'
 
         def create_text():
             author_username = f'@/{util.get_username_local(ttweet.author_id)}'
             mention_ids = set()
             ret = str()
+            just = ''
             if is_catchup:
-                # ret += '[catch-up tweet]\n'
                 ret += f'{ttweet.get_datetime_str()}\n'
                 pass
-
+            else:
+                just = 'just '
+            
             # Tweet types
             if ttweet.rt_target is not None: # standalone tweet
-                ret += RETWEET.format(author_username, f'@/{util.get_username(ttweet.rt_author_id)}')
+                ret += RETWEET.format(author_username, just, f'@/{util.get_username(ttweet.rt_author_id)}')
                 mention_ids.clear()
             elif ttweet.reply_to is not None: # reply (w/ qrt; push it into mentions)
-                reply_username = f'@/{util.get_username_local(ttweet.reply_to)}'
-                ret += REPLY.format(author_username, reply_username)
+                reply_username = f'@/{util.get_username(ttweet.reply_to)}'
+                ret += REPLY.format(author_username, just, reply_username)
                 
                 mention_ids = set(ttweet.mentions)
                 mention_ids.add(ttweet.quote_retweeted)
                 try: mention_ids.remove(None)
                 except: pass
             elif ttweet.quote_retweeted is not None: # standalone qrt
-                quoted_username = f'@/{util.get_username_local(ttweet.quote_retweeted)}'
-                ret += QUOTE_TWEET.format(author_username, quoted_username)
+                quoted_username = f'@/{util.get_username(ttweet.quote_retweeted)}'
+                ret += QUOTE_TWEET.format(author_username, just, quoted_username)
             elif len(ttweet.mentions) > 0: # standalone tweet w/ mentions
-                ret += TWEET.format(author_username)
+                ret += TWEET.format(author_username, just)
             else:
                 raise ValueError(f'TalentTweet {ttweet.tweet_id} has insufficient other parties')
 
             # mention line
             if len(mention_ids) > 0:
-                mention_usernames = [f'@/{util.get_username_local(x)}' for x in mention_ids]
+                mention_usernames = [f'@/{util.get_username(x)}' for x in mention_ids]
                 ret += (
                     'mentioning '
                     f'{" ".join(mention_usernames)}\n'
@@ -222,16 +224,18 @@ class TwAPI:
         try:
             # print('creating reply img')
             # media_ids = [await self.get_ttweet_image_media_id(ttweet)]
-            print('posting main tweet')
+            print('posting main tweet...', end='')
             twt_resp = await self.post_tweet(text)
+            print('done')
             twt_id = twt_resp.data['id']
-            print('creating reply img')
+            print('creating reply img...', end='')
             media_ids = [await self.get_ttweet_image_media_id(ttweet)]
             # if ttweet.reply_to is not None:
                 # re_ttweet = tt.TalentTweet(tweet_id=ttweet.reply_to, author_id=)
                 # media_ids.insert(0, await self.get_ttweet_image_media_id())
-            print('posting reply tweet')
+            print('posting reply tweet...', end='')
             await self.post_tweet(reply_to_tweet=twt_id, media_ids=media_ids,)
+            print('done')
             print('successfully posted ttweet!')
             return True
         except tweepy.Forbidden as e:

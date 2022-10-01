@@ -3,7 +3,7 @@ import platform
 
 import pytz
 
-from twapi import *
+import twapi
 import talent_lists
 import util
 
@@ -69,13 +69,14 @@ class TalentTweet:
                 if quoted_id == -1:
                     quoted_id = util.get_user_id_online(quoted_username)
 
+        # FIXME: resultant tweets don't show timezone properly
         date_time = datetime.datetime.strptime(tweet.datetime, '%Y-%m-%d %H:%M:%S %Z')
         return TalentTweet(tweet_id=tweet.id, author_id=tweet.user_id, date_time=date_time, mrq=(mentions, reply_to, quoted_id))
 
     @staticmethod
     def create_from_v2api_response(resp):
         tweet = resp.data
-        mrq = TwAPI.get_mrq(tweet, resp)
+        mrq = twapi.TwAPI.get_mrq(tweet, resp)
         rt_target = None
         rt_author_id = None
 
@@ -99,7 +100,7 @@ class TalentTweet:
 
     @staticmethod
     async def create_from_id(id):
-        resp = await TwAPI.instance.get_tweet_response(id)
+        resp = await twapi.TwAPI.instance.get_tweet_response(id)
         return TalentTweet.create_from_v2api_response(resp)
 
     def __init__(self, tweet_id: int, author_id: int, date_time: datetime.datetime, mrq: tuple, rt_target: int=None, rt_author_id: int=None):
@@ -115,9 +116,10 @@ class TalentTweet:
         self.all_parties.update(self.mentions)
         try:
             self.all_parties.remove(None)
+        except: pass
+        try:
             self.all_parties.remove(self.author_id)
-        except:
-            pass
+        except: pass
     
 
     def __repr__(self) -> str:

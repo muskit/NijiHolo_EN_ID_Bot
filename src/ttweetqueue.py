@@ -85,3 +85,5 @@ class TalentTweetQueue:
         if self.good:
             print('Ended in good state, deleting backup queue...')
             os.remove(self.queue_backup_path)
+        else:
+            print('Ended in bad state, keeping backup queue.')

@@ -51,7 +51,7 @@ async def create_ttweet_image(ttweet):
     filename = f'{get_project_dir()}/img.png'
     url = ttweet_to_url(ttweet)
     img = None
-
+    print(url)
     try: os.remove(filename)
     except: pass
     try:

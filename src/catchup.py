@@ -105,20 +105,23 @@ async def process_queue() -> bool:
     
     try:
         while len(queue.ttweets_dict) > 0:
-            print(f'({ttweets_posted+1}/{queued_ttweets_count})')
             key = list(queue.ttweets_dict.keys())[0]
             ttweet = queue.ttweets_dict[key]
             queue.good = False
             tweet_was_successful = await TwAPI.instance.post_ttweet(ttweet, is_catchup=True)
             queue.ttweets_dict.pop(key)
+            
+            print('saving new queue...')
+            queue.good = True
+            queue.save_file()
             if tweet_was_successful:
-                print('saving new queue...')
-                queue.good = True
-                queue.save_file()
                 ttweets_posted += 1
+                print(f'({ttweets_posted}/{queued_ttweets_count}) done')
                 if len(queue.ttweets_dict) > 0:
                     print(f'resting for {WAIT_TIME}s...')
-                    await asyncio.sleep(WAIT_TIME)
+                    await asyncio.sleep(WAIT_TIME-5)
+                    print('5 second warning!')
+                    await asyncio.sleep(5)
     except:
         print('Unhandled error occurred while posting tweets from queue.')
         errored = True
