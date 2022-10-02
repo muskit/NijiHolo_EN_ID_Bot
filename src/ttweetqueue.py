@@ -25,7 +25,7 @@ class TalentTweetQueue:
 
         ## file check, backup copy
         if os.path.exists(self.queue_backup_path):
-            print('Found old backup queue! We errored in the previous run.')
+            print('Found backup queue! We errored in the previous run.')
             shutil.copyfile(self.queue_backup_path, self.queue_path)
         elif os.path.exists(self.queue_path):
             print('Creating backup queue...')
@@ -77,6 +77,7 @@ class TalentTweetQueue:
         return self.ttweets_dict[id]
 
     def get_next_ttweet(self):
+        self.is_good = False
         if os.path.exists(self.current_ttweet_path):
             with open(self.current_ttweet_path, 'r') as f:
                 return tt.TalentTweet.deserialize(f.readline())
@@ -86,7 +87,6 @@ class TalentTweetQueue:
         ttweet = self.ttweets_dict.pop(key)
         with open(self.current_ttweet_path, 'w') as f:
             f.write(ttweet.serialize())
-        self.is_good = False
         return ttweet
     
     def get_count(self):

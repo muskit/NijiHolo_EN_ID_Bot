@@ -151,7 +151,6 @@ async def run(program_args):
                     return True
             else:
                 print('Tweets were not retrieved cleanly.')
-                # os.remove(queue_path)  # keep backup queue
                 return False
         except:
             print('Unhandled error occurred while running catch up in posting phase.')
