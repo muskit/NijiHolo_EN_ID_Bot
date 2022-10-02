@@ -7,6 +7,7 @@ import code
 import nest_asyncio
 
 import talent_lists
+import ttweetqueue as ttq
 import api_secrets
 import catchup
 import listen
@@ -97,10 +98,13 @@ def main():
     ## We expect to run in some mode now.
 
     # Initialize shared API instance
-    twApi = TwAPI.instance = TwAPI()
+    TwAPI()
 
     # Initialize talent account lists
     talent_lists.init()
+
+    # Initialize queue files system
+    ttq.TalentTweetQueue()
 
     ## Asynchronous execution
     nest_asyncio.apply()

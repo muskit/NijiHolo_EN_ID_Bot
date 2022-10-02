@@ -23,6 +23,8 @@ errored = False
 
 ## Returns the ID of all tweets (up to limit) from a user ID.
 def get_user_tweets(id, since_timestamp=None, limit=None):
+    global safe_to_post_tweets
+
     qrt_count = 0
     tweets = list()
     c = twint.Config()
@@ -52,7 +54,6 @@ def get_user_tweets(id, since_timestamp=None, limit=None):
 # Returns a list of sorted and filtered TalentTweets (should
 # be equivalent to queue.txt)
 async def get_cross_talent_tweets():
-    posted_ttweets = set() # TODO: don't add TTweet to ttweets_dict if its id exists in posted_ttweets
     global safe_to_post_tweets
 
     queue = ttq.TalentTweetQueue.instance
@@ -65,7 +66,7 @@ async def get_cross_talent_tweets():
             try:
                 tweets = get_user_tweets(talent_id, since_timestamp=queue.finished_user_timestamps.get(talent_id, None))
                 for tweet in tweets:
-                    if tweet.id not in queue.ttweets_dict:
+                    if tweet.id not in queue.ttweets_dict and tweet.id not in queue.finished_ttweets:
                         ttweet = await tt.TalentTweet.create_from_twint_tweet(tweet)
                         if ttweet.is_cross_company():
                             queue.add_ttweet(ttweet)
@@ -83,8 +84,6 @@ async def get_cross_talent_tweets():
     else:
         print('Successfully saved all tweets from online!')
         queue.save_file()
-    
-    return queue.get_ttweets_dict()
 
 # return False = errored or we posted at least one ttweet
 # return True = we didn't post a single ttweet
@@ -96,28 +95,26 @@ async def process_queue() -> bool:
     errored = False
 
     queue = ttq.TalentTweetQueue.instance
-    queued_ttweets_count = len(queue.ttweets_dict)
+    queued_ttweets_count = queue.get_count()
 
-    if queued_ttweets_count == 0: return ttweets_posted
+    if queued_ttweets_count == 0:
+        print('post-able queue is empty!')
+        return True
     
     if PROGRAM_ARGS.announce_catchup:
         TwAPI.instance.post_tweet(text=f'Starting to catch up through {queued_ttweets_count} logged tweets.')
     
     try:
-        while len(queue.ttweets_dict) > 0:
-            key = list(queue.ttweets_dict.keys())[0]
-            ttweet = queue.ttweets_dict[key]
-            queue.good = False
+        while not queue.is_empty():
+            ttweet = queue.get_next_ttweet()
             tweet_was_successful = await TwAPI.instance.post_ttweet(ttweet, is_catchup=True)
-            queue.ttweets_dict.pop(key)
             
-            print('saving new queue...')
-            queue.good = True
-            queue.save_file()
+            print('running queue.good()...')
+            queue.good()
             if tweet_was_successful:
                 ttweets_posted += 1
                 print(f'({ttweets_posted}/{queued_ttweets_count}) done')
-                if len(queue.ttweets_dict) > 0:
+                if not queue.is_empty():
                     print(f'resting for {WAIT_TIME}s...')
                     await asyncio.sleep(WAIT_TIME-5)
                     print('5 second warning!')
@@ -129,7 +126,7 @@ async def process_queue() -> bool:
     else:
         if PROGRAM_ARGS.announce_catchup:
             await TwAPI.instance.post_tweet('Finished with catch-up tweets!')
-    
+
     if errored or ttweets_posted > 0:
         return False
     return True
@@ -142,15 +139,11 @@ async def run(program_args):
     global safe_to_post_tweets
     PROGRAM_ARGS = program_args
 
-    # in case we we experience failure and we're left with blank queue.txt
-    # TODO: create TweetQueue class to organize file IO better; move all backup operations to there
-    ttq.TalentTweetQueue()
-
     ret = None
+    queue = ttq.TalentTweetQueue.instance
     while True:
-        queue = ttq.TalentTweetQueue.instance
-        ttweets_dict = queue.ttweets_dict = await get_cross_talent_tweets()
-        print(f'found {len(ttweets_dict)} cross-company tweets')
+        await get_cross_talent_tweets()
+        print(f'{queue.get_count()} cross-company tweets to attempt sharing.')
         try:
             if safe_to_post_tweets:
                 if await process_queue():

@@ -6,18 +6,19 @@ import tweepy
 from talenttweet import TalentTweet
 
 from twapi import TwAPI
+import ttweetqueue as ttq
 import api_secrets
 import talent_lists as tl
 
 def on_response(resp):
-    id = resp.data.id
     ttweet = TalentTweet.create_from_v2api_response(resp)
         
     if ttweet.is_cross_company():
-        print(f'Tweet {id} is cross-company! Creating post...')
+        print(f'Tweet {ttweet.tweet_id} is cross-company! Creating post...')
         asyncio.run(TwAPI.instance.post_ttweet(ttweet))
+        ttq.TalentTweetQueue.instance.add_finished_tweet(ttweet.tweet_id)
     else:
-        print(f'Tweet {id} is not cross-company.')
+        print(f'Tweet {ttweet.tweet_id} is not cross-company.')
 
 def run():
     sc = tweepy.StreamingClient(api_secrets.bearer_token())

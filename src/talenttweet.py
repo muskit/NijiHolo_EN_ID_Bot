@@ -71,6 +71,7 @@ class TalentTweet:
 
         # FIXME: resultant tweets don't show timezone properly
         date_time = datetime.datetime.strptime(tweet.datetime, '%Y-%m-%d %H:%M:%S %Z')
+        print(date_time)
         return TalentTweet(tweet_id=tweet.id, author_id=tweet.user_id, date_time=date_time, mrq=(mentions, reply_to, quoted_id))
 
     @staticmethod
