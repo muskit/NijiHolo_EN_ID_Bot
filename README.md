@@ -3,7 +3,7 @@
 
 ![The project banner](images/banner.png)
 
-**This project is intended to run [this account](https://twitter.com/NijiHolo_EN_ID).**
+**This bot is intended to run [this account](https://twitter.com/NijiHolo_EN_ID).**
 
 ## Running modes
 The bot will be runnable in three modes:
@@ -23,4 +23,4 @@ The bot will be runnable in three modes:
     * involved names (w/o @) and the tweet (as a quote tweet)
     * screenshot of the tweet (+ maybe image of tweet being replied to when applicable)
 
-**This project was created in the spirit of entertainment and in the name of unity.**
+**This project was created for the spirit of entertainment and in the name of unity.**
