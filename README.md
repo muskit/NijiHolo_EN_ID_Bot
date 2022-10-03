@@ -23,4 +23,4 @@ The bot will be runnable in three modes:
     * involved names (w/o @) and the tweet (as a quote tweet)
     * screenshot of the tweet (+ maybe image of tweet being replied to when applicable)
 
-**This project was created for entertainment purposes. It is not to be used for malicious purposes.**
+**This project was created in the spirit of entertainment and in the name of unity.**
