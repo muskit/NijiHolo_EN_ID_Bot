@@ -98,7 +98,7 @@ async def process_queue() -> bool:
     queued_ttweets_count = queue.get_count()
 
     if queued_ttweets_count == 0:
-        print('post-able queue is empty!')
+        print('Posting queue is empty!')
         return True
     
     if PROGRAM_ARGS.announce_catchup:

@@ -52,5 +52,7 @@ def run():
             errors_encountered += 1
             print('Ran into an error while in listen mode.')
             traceback.print_exc()
+        else:
+            print('API stream exited gracefully.')
         print('Re-running listen mode...')
         print(f'(Had {errors_encountered} errors so far.)')
