@@ -1,4 +1,5 @@
 import datetime
+from zoneinfo import ZoneInfo
 import platform
 
 import pytz
@@ -69,9 +70,11 @@ class TalentTweet:
                 if quoted_id == -1:
                     quoted_id = util.get_user_id_online(quoted_username)
 
-        # FIXME: resultant tweets don't show timezone properly
+        # NOTE: strptime doesn't attach timezone info.
+        # tweet's datetime will be in local time
         date_time = datetime.datetime.strptime(tweet.datetime, '%Y-%m-%d %H:%M:%S %Z')
-        print(date_time)
+        LOCAL_TIMEZONE = datetime.datetime.now().astimezone().tzinfo
+        date_time = date_time.replace(tzinfo=LOCAL_TIMEZONE) # attach system local timezone
         return TalentTweet(tweet_id=tweet.id, author_id=tweet.user_id, date_time=date_time, mrq=(mentions, reply_to, quoted_id))
 
     @staticmethod

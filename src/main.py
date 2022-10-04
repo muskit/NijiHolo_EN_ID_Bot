@@ -71,7 +71,7 @@ async def async_main():
         print('RUNNING IN CATCH UP MODE')
         if await catchup.run(PROGRAM_ARGS) and PROGRAM_ARGS.auto_listen:
             print('CATCH UP MODE DONE, GOING INTO LISTEN MODE')
-            await listen.run()
+            listen.run()
     elif mode in ['d', 'delete-all']:
         print('WARNING: SELF-DESTRUCT MODE')
         await self_destruct()
