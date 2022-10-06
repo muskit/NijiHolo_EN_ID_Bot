@@ -229,14 +229,18 @@ class TwAPI:
             twt_resp = await self.post_tweet(text)
             print('done')
             twt_id = twt_resp.data['id']
-            print('creating reply img...', end='')
-            media_ids = [await self.get_ttweet_image_media_id(ttweet)]
             # if ttweet.reply_to is not None:
                 # re_ttweet = tt.TalentTweet(tweet_id=ttweet.reply_to, author_id=)
                 # media_ids.insert(0, await self.get_ttweet_image_media_id())
-            print('posting reply tweet...', end='')
-            await self.post_tweet(reply_to_tweet=twt_id, media_ids=media_ids,)
-            print('done')
+
+            try:
+                print('creating reply img...', end='')
+                media_ids = [await self.get_ttweet_image_media_id(ttweet)]
+                print('posting reply tweet...', end='')
+                await self.post_tweet(reply_to_tweet=twt_id, media_ids=media_ids,)
+                print('done')
+            except:
+                print('Had trouble posting reply image tweet.')
             print('successfully posted ttweet!')
             return True
         except tweepy.Forbidden as e:
