@@ -1,9 +1,9 @@
 # NijiHolo EN/ID Bot
-*Twitter bot that tracks interactions between Nijisanji EN/ID and hololive EN/ID members.*
+*Twitter bot that tracks interactions between Nijisanji EN/ID, hololive EN/ID, and holostars EN members.*
 
 ![The project banner](images/banner.png)
 
-**This bot is intended to run [this account](https://twitter.com/NijiHolo_EN_ID).**
+**This project was created to run [this account](https://twitter.com/NijiHolo_EN_ID).**
 
 ## Running modes
 The bot will be runnable in three modes:
