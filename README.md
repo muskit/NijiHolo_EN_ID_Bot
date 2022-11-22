@@ -14,6 +14,8 @@ The bot will be runnable in three modes:
 
 ## Extra TODOs
 * Include screenshot of tweet being replied to
+* Fix main post's quote tweet formatting
+* Fix mentions not showing when a standard TalentTweet is created
 
 ## Notes
 * Tweets should only occur if involved parties are cross-company
