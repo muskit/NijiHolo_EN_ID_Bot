@@ -90,7 +90,7 @@ async def get_cross_talent_tweets():
 async def process_queue() -> bool:
     global PROGRAM_ARGS
     global errored
-    WAIT_TIME = 30
+    WAIT_TIME = 60*3
     ttweets_posted = 0
     errored = False
 

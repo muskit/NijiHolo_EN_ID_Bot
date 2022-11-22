@@ -219,7 +219,9 @@ class TwAPI:
                     'mentioning '
                     f'{" ".join(mention_usernames)}\n'
                 )
-            ret += f'\n{util.ttweet_to_url(ttweet)}'
+            ret += '\n'
+            ret += '(this is a misssed tweet)\n' if is_catchup else ''
+            ret += f'{util.ttweet_to_url(ttweet)}'
             return ret
         
         text = create_text()
