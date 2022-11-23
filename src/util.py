@@ -10,6 +10,7 @@ import twint
 import twapi
 from tweetcapture import TweetCapture
 
+from recrop import fix_aspect_ratio
 import talent_lists
 
 # returns system path to this project, which is
@@ -61,6 +62,7 @@ async def create_ttweet_image(ttweet):
             mode=4,
             night_mode=1
         )
+        img = fix_aspect_ratio(img)
     except:
         print('unable to create tweet image')
         traceback.print_exc()

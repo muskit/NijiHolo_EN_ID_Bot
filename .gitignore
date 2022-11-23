@@ -146,6 +146,7 @@ cython_debug/
 secrets.ini
 queue.txt
 img.png
+img_adjusted.png
 src/img.png
 _queue_backup.txt
 _current_ttweet.txt
