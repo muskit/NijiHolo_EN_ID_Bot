@@ -220,7 +220,7 @@ class TwAPI:
                     f'{" ".join(mention_usernames)}\n'
                 )
             ret += '\n'
-            ret += '(this is a misssed tweet)\n' if is_catchup else ''
+            ret += '(this is a missed tweet)\n' if is_catchup else ''
             ret += f'{util.ttweet_to_url(ttweet)}'
             return ret
         

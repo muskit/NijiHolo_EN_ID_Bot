@@ -162,10 +162,10 @@ class TalentTweet:
                 if other_id in talent_lists.holo_en or other_id in talent_lists.holo_id:
                     return True
             if self.author_id in talent_lists.holo_id:
-                if other_id in talent_lists.niji_en:
+                if other_id in talent_lists.niji_en or other_id in talent_lists.niji_exid:
                     return True
             if self.author_id in talent_lists.niji_exid:
-                if other_id in talent_lists.holo_en:
+                if other_id in talent_lists.holo_en or other_id in talent_lists.holo_id:
                     return True
         return False
     
