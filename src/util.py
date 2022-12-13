@@ -60,7 +60,8 @@ async def create_ttweet_image(ttweet):
             url=url,
             path=filename,
             mode=4,
-            night_mode=1
+            night_mode=1,
+            show_parent_tweets=True
         )
         img = fix_aspect_ratio(img)
     except:
