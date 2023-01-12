@@ -6,7 +6,7 @@ import util
 import talenttweet as tt
 
 # User timestamps line format:
-# # {user_id} {status_num} {UNIX_timestamp}
+# {user_id} {status_num} {UNIX_timestamp}
 
 class TalentTweetQueue:
     instance = None

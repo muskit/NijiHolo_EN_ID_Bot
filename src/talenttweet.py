@@ -80,7 +80,8 @@ class TalentTweet:
     @staticmethod
     def create_from_v2api_response(resp):
         tweet = resp.data
-        mrq = twapi.TwAPI.get_mrq(tweet, resp)
+        
+        mrq = twapi.TwAPI.get_mrq(resp)
         rt_target = None
         rt_author_id = None
 
