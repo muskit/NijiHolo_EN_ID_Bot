@@ -1,5 +1,5 @@
 # NijiHolo EN/ID Bot
-Twitter bot that tracks interactions between Nijisanji EN/ID, hololive EN/ID, and holostars EN members.
+Twitter bot that tracks cross-company interactions between *Nijisanji EN/ID*, *hololive EN/ID*, and *HOLOSTARS EN* members.
 
 ![The project banner](images/banner.png)
 
