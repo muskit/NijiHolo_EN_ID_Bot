@@ -22,7 +22,7 @@ safe_to_post_tweets = True
 errored = False
 
 ## Returns the ID of all tweets (up to limit) from a user ID.
-def get_user_tweets(id, since_timestamp=None, limit=None):
+def get_user_tweets(id, since_date=None, limit=None):
     global safe_to_post_tweets
 
     qrt_count = 0
@@ -33,7 +33,7 @@ def get_user_tweets(id, since_timestamp=None, limit=None):
     c.Store_object = True
     c.Store_object_tweets_list = tweets
     c.Hide_output = True
-    c.Since = '' if since_timestamp == None else util.timestamp_to_tdate(since_timestamp)
+    c.Since = '' if since_date == None else f'{since_date} 00:00:00'
     
     user_str = f'@{util.get_username_local(id)}'
     print(f'Scraping tweets from {user_str} since {"forever ago" if c.Since == "" else c.Since}...')
@@ -64,7 +64,7 @@ async def get_cross_talent_tweets():
         for i, (talent_id, talent_username) in enumerate(talent_lists.talents.items()):
             print(f'[{i+1}/{len(talent_lists.talents)}] {talent_username}-----------------------------------')
             try:
-                tweets = get_user_tweets(talent_id, since_timestamp=queue.finished_user_timestamps.get(talent_id, None))
+                tweets = get_user_tweets(talent_id, since_date=queue.finished_user_dates.get(talent_id, None))
                 for tweet in tweets:
                     if tweet.id not in queue.ttweets_dict and tweet.id not in queue.finished_ttweets:
                         ttweet = await tt.TalentTweet.create_from_twint_tweet(tweet)
@@ -74,9 +74,9 @@ async def get_cross_talent_tweets():
                 print('Error occurred processing tweet data.')
                 safe_to_post_tweets = False
                 print(traceback.format_exc())
-                queue.finished_user_timestamps[talent_id] = -1
+                queue.finished_user_dates[talent_id] = '2000-01-01'
             else:
-                queue.finished_user_timestamps[talent_id] = util.get_current_timestamp()
+                queue.finished_user_dates[talent_id] = util.get_current_date()
     except:
         print('Unhandled error occurred while pulling tweets.')
         traceback.print_exc()

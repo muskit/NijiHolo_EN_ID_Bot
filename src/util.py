@@ -2,7 +2,7 @@
 
 import os
 import traceback
-import datetime
+from datetime import datetime
 
 import tweepy
 import pytz
@@ -27,19 +27,22 @@ def get_queue_backup_path():
 def clamp(n, smallest, largest):
     return max(smallest, min(n, largest))
 
-def datetime_to_tdate(date_time: datetime.datetime):
+def datetime_to_tdate(date_time: datetime):
     return date_time.strftime("%Y-%m-%d")
 
 def tdate_to_datetime(tdate: str):
-    return datetime.datetime.strptime("%Y-%m-%d")
+    return datetime.strptime("%Y-%m-%d")
 
 def timestamp_to_tdate(timestamp=None):
     if timestamp==None:
-        timestamp = datetime.datetime.now().timestamp()
-    return datetime_to_tdate(datetime.datetime.fromtimestamp(timestamp, tz=pytz.utc))
+        timestamp = datetime.now().timestamp()
+    return datetime_to_tdate(datetime.fromtimestamp(timestamp, tz=pytz.utc))
 
 def get_current_timestamp():
-    return datetime.datetime.now().timestamp()
+    return datetime.now().timestamp()
+
+def get_current_date():
+    return datetime.today().strftime('%Y-%m-%d')
 
 def get_key_from_value(d, val):
     keys = [k for k, v in d.items() if v == val]

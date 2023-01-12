@@ -19,7 +19,7 @@ class TalentTweetQueue:
         self.finished_ttweets_path = f'{util.get_project_dir()}/finished_ttweets.txt'
         self.is_good = True
         self.__sorted = False
-        self.finished_user_timestamps = dict()
+        self.finished_user_dates = dict()
         self.ttweets_dict = dict()
         self.finished_ttweets = list()
 
@@ -40,11 +40,11 @@ class TalentTweetQueue:
                     if len(tokens) == 0: continue
 
                     if tokens[0][0] != '#':
-                        print(f'Stopped finding user timestamps at {line}')
+                        print(f'Stopped finding user dates at {line}')
                         # reached end of accounts list
                         break
                     if tokens[2] != '-1':
-                        self.finished_user_timestamps[int(tokens[1])] = float(tokens[2])
+                        self.finished_user_dates[int(tokens[1])] = tokens[2]
         except: pass
         # ttweets
         try:
@@ -56,7 +56,7 @@ class TalentTweetQueue:
                         continue
                     ttweet = tt.TalentTweet.deserialize(line)
                     self.ttweets_dict[ttweet.tweet_id] = ttweet
-                print(f'Found {len(self.finished_user_timestamps)} scraped accounts and {len(self.ttweets_dict)} tweets in queue.')
+                print(f'Found {len(self.finished_user_dates)} scraped accounts and {len(self.ttweets_dict)} tweets in queue.')
         except: pass
         # finished ttweets
         try:
@@ -108,9 +108,9 @@ class TalentTweetQueue:
         shutil.copyfile(self.queue_path, self.queue_backup_path)
         self.__sort_ttweets_dict()
         with open(self.queue_path, 'w') as f:
-            # write timestamps
-            for (id, timestamp) in self.finished_user_timestamps.items():
-                f.write(f'# {id} {timestamp}\n')
+            # write dates
+            for (id, date) in self.finished_user_dates.items():
+                f.write(f'# {id} {date}\n')
 
             f.write('\n')
 

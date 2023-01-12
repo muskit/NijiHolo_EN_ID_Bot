@@ -178,10 +178,10 @@ class TwAPI:
     async def post_ttweet(self, ttweet: tt.TalentTweet, is_catchup=False, dry_run=False):
         print(f'------{ttweet.tweet_id} ({util.get_username_local(ttweet.author_id)})------')
 
-        REPLY = '{0} replied to {1}\n'
-        QUOTE_TWEET = '{0} quote tweeted {1}\n'
-        TWEET = '{0} tweeted\n'
-        RETWEET = '{0} retweeted {1}\n'
+        REPLY = '{0} replied to {1}!\n'
+        QUOTE_TWEET = '{0} quote tweeted {1}!\n'
+        TWEET = '{0} tweeted!\n'
+        RETWEET = '{0} retweeted {1}!\n'
 
         def create_text():
             author_username = f'@/{util.get_username_local(ttweet.author_id)}'
@@ -225,6 +225,7 @@ class TwAPI:
         ttweet_url = util.ttweet_to_url(ttweet)
         
         if dry_run: # DRY-RUN: only print tweet
+            print('--------------- [DRY RUN] ---------------')
             print(text)
             print(f'QRT: {ttweet_url}')
         else: # NO DRY-RUN: post actual tweet
