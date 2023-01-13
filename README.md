@@ -1,5 +1,5 @@
 # NijiHolo EN/ID Bot
-Twitter bot that tracks cross-company interactions between *Nijisanji EN/ID*, *hololive EN/ID*, and *HOLOSTARS EN* members.
+Twitter bot that tracks cross-company interactions between the non-JP branches of *hololive*/*HOLOSTARS* and *Nijisanji*!
 
 ![The project banner](images/banner.png)
 
@@ -15,4 +15,4 @@ The bot may run in these modes:
 ## TODOs
 * Fix catch-up mode (`TWINT` is broken yet again *\*sigh\**)
 
-*Created for the spirit of entertainment and in the name of unity.*
+*Created for the spirit of entertainment and in the name of unity.* ❤
