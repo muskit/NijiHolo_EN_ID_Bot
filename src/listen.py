@@ -30,15 +30,22 @@ def run():
             sc = tweepy.StreamingClient(api_secrets.bearer_token())
 
             # clear rules
+            print('Clearing streaming rules...')
             rules_resp = sc.get_rules()
             if rules_resp.data:
+                print('Deleted a rule!')
                 sc.delete_rules(rules_resp.data)
 
             # create new rules
+            print('Creating new streaming rules...')
             for rule in tl.get_twitter_rules():
                 sc.add_rules(tweepy.StreamRule(rule))
+            print('--------------------------------------------')
+            print(sc.get_rules().data)
+            print('--------------------------------------------')
 
             sc.on_response=on_response
+            print('Starting listening stream...')
             sc.filter(
                 expansions=TwAPI.TWEET_EXPANSIONS,
                 media_fields=TwAPI.TWEET_MEDIA_FIELDS,

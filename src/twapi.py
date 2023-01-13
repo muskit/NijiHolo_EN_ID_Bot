@@ -6,6 +6,7 @@ import tweepy
 
 import api_secrets
 import talenttweet as tt
+import talent_lists as tl
 import util
 
 class TwAPI:
@@ -22,6 +23,8 @@ class TwAPI:
     # media_fields=['url'],
     # tweet_fields=['created_at', 'in_reply_to_user_id'],
     # expansions=['entities.mentions.username', 'referenced_tweets.id.author_id']
+    #
+    # VALUES IN TUPLE ARE NONE OR INT.
     @staticmethod
     def get_mrq(response):
         tweet = response.data
@@ -54,6 +57,13 @@ class TwAPI:
         try:
             mentions.remove(qrt)
         except: pass
+
+        mention_list = list(mentions)
+        for uid in mention_list:
+            if uid not in tl.talents.keys():
+                mentions.remove(uid)
+        if reply_to not in tl.talents.keys():
+            reply_to = None
         
         return (mentions, reply_to, qrt)
 
@@ -215,7 +225,7 @@ class TwAPI:
                 mention_usernames = [f'@/{util.get_username(x)}' for x in print_mention_ids]
                 ret += (
                     'mentioning '
-                    f'{" ".join(mention_usernames)}\n'
+                    f'{", ".join(mention_usernames)}\n'
                 )
             ret += '\n'
             ret += '(this is a missed tweet)\n' if is_catchup else ''

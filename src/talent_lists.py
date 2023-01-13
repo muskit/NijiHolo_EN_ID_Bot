@@ -8,7 +8,8 @@ talents = dict()
 
 test_talents = dict()
 
-def __create_dict(file, _dict):
+# TODO: talents(id) -> (name, company)
+def __create_dict(file, _dict, company):
     print(f'Initializing talents\' account list from {file}...')
     global talents
     with open(file, 'r') as f:
@@ -16,7 +17,7 @@ def __create_dict(file, _dict):
             words = line.split()
             if len(words) == 2 and line[0] != '#':
                 name, id = line.split()
-                name = util.get_username_online(id, default=name) # attempt to get updated name
+                name = f'{util.get_username_online(id, default=name)} ({company})' # attempt to get updated name
                 talents[int(id)] = name
                 _dict[int(id)] = name
 def init():
@@ -27,13 +28,14 @@ def init():
     global test_talents
 
     # holoEN
-    __create_dict(f'{util.get_project_dir()}/lists/holoen.txt', holo_en)
+    __create_dict(f'{util.get_project_dir()}/lists/holoen.txt', holo_en, 'holoEN')
     # holoID
-    __create_dict(f'{util.get_project_dir()}/lists/holoid.txt', holo_id)
+    __create_dict(f'{util.get_project_dir()}/lists/holoid.txt', holo_id, 'holoID')
     # nijiEN
-    __create_dict(f'{util.get_project_dir()}/lists/nijien.txt', niji_en)
+    __create_dict(f'{util.get_project_dir()}/lists/nijien.txt', niji_en, 'nijiEN')
     # nijiexID
-    __create_dict(f'{util.get_project_dir()}/lists/nijiexid.txt', niji_exid)
+    __create_dict(f'{util.get_project_dir()}/lists/nijiexid.txt', niji_exid, 'nijiex-ID')
+    # TODO: nijiex-KR
 
     test_talents = holo_en
 
@@ -42,12 +44,12 @@ def get_twitter_rules():
     rules = list()
 
     names = list(talents.values())
-    curr_rule = f'from:{names[0]}'
+    curr_rule = f'from:{names[0].split()[0]}'
     for name in list(talents.values())[1:]:
-        test_rule = curr_rule +  f' OR from:{name}'
+        test_rule = curr_rule +  f' OR from:{name.split()[0]}'
         if len(test_rule) > 512:
             rules.append(curr_rule)
-            curr_rule = f'from:{name}'
+            curr_rule = f'from:{name.split()[0]}'
         else:
             curr_rule = test_rule
     return rules

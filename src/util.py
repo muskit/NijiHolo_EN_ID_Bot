@@ -1,6 +1,7 @@
 ## Shared utility functions.
 
 import os
+import sys
 import traceback
 from datetime import datetime
 
@@ -52,7 +53,9 @@ def get_key_from_value(d, val):
 
 async def create_ttweet_image(ttweet):
     tc = TweetCapture()
-    tc.driver_path = '/usr/bin/chromedriver' # Linux chromedriver path
+    if 'linux' in sys.platform:
+        # Linux chromedriver path
+        tc.driver_path = '/usr/bin/chromedriver'
     filename = f'{get_project_dir()}/img.png'
     url = ttweet_to_url(ttweet)
     img = None
