@@ -267,13 +267,13 @@ class TwAPI:
                 except:
                     print('Had trouble posting reply image tweet.')
                 print('successfully posted ttweet!')
-                return True
             except tweepy.Forbidden as e:
                 if 'duplicate content' in e.api_messages[0]:
                     print('Twitter says the TalentTweet is a duplicate; skipping error-free...')
                     return False
                 else:
                     raise e
+        return True
     
     def post_ttweet_by_id(self, tweet_id, is_catchup=False, dry_run=False):
         ttweet = asyncio.run(tt.TalentTweet.create_from_id(tweet_id))
