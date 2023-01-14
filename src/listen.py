@@ -10,18 +10,23 @@ from twapi import TwAPI
 import ttweetqueue as ttq
 import api_secrets
 import talent_lists as tl
+import util
 
 errors_encountered = 0
 
 def on_response(resp):
     ttweet = TalentTweet.create_from_v2api_response(resp)
+    tweet_username = util.get_username(ttweet.author_id)
         
     if ttweet.is_cross_company():
         print(f'Tweet {ttweet.tweet_id} is cross-company! Creating post...')
-        asyncio.run(TwAPI.instance.post_ttweet(ttweet))
-        ttq.TalentTweetQueue.instance.add_finished_tweet(ttweet.tweet_id)
+        is_successful = asyncio.run(TwAPI.instance.post_ttweet(ttweet))
+        if is_successful:
+            ttq.TalentTweetQueue.instance.add_finished_tweet(ttweet.tweet_id)
+        else:
+            print(f'[WARNING] Failed to post ttweet for {tweet_username}/{ttweet.tweet_id}!')
     else:
-        print(f'Tweet {ttweet.tweet_id} is not cross-company.')
+        print(f'Tweet {tweet_username}/{ttweet.tweet_id} is not cross-company.')
 
 def run():
     global errors_encountered

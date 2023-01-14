@@ -237,7 +237,7 @@ class TwAPI:
         
         if dry_run: print('-------------------- DRY RUN --------------------')
         print(text)
-        if dry_run: return
+        if dry_run: return False
 
         # NO DRY-RUN: actually post tweet
         # main tweet: text + screenshot
