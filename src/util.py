@@ -86,9 +86,6 @@ def ttweet_to_url(ttweet):
     username = get_username(ttweet.author_id)
     return get_tweet_url(ttweet.tweet_id, username)
 
-def get_username_local(id):
-    return talent_lists.talents.get(id, f'{id}')
-
 # twint
 # May not work with short user IDs (ie. 1354241437)
 # def get_username_online(id, default=None):
@@ -104,8 +101,10 @@ def get_username_local(id):
 #     except:
 #         return str(default) if default is not None else f'{id}'
 
-# API v2 (tweepy)
-# Short user IDs (ie. 1354241437) apparently don't work with twint
+def get_username_local(id):
+    return talent_lists.talents.get(id, f'{id}')
+
+# Retrieve username via API v2 (tweepy)
 def get_username_online(id, default=None):
     try:
         resp = twapi.TwAPI.instance.client.get_user(id=id)
@@ -123,6 +122,10 @@ def get_username(id):
     if ret == None:
         return get_username_online(id)
     return ret
+
+def get_username_with_company(id):
+    company = talent_lists.talents_company.get(id, None)
+    return f'{get_username(id)} {f"({company})" if company is not None else ""}'
 
 def get_user_id_local(username) -> int:
     talent_usernames = list(talent_lists.talents.values())

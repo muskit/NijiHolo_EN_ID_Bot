@@ -5,6 +5,7 @@ holo_id = dict()
 niji_en = dict()
 niji_exid = dict()
 talents = dict()
+talents_company = dict()
 
 test_talents = dict()
 
@@ -17,9 +18,10 @@ def __create_dict(file, _dict, company):
             words = line.split()
             if len(words) == 2 and line[0] != '#':
                 name, id = line.split()
-                name = f'{util.get_username_online(id, default=name)} ({company})' # attempt to get updated name
+                name = f'{util.get_username_online(id, default=name)}' # attempt to get updated name
                 talents[int(id)] = name
                 _dict[int(id)] = name
+                talents_company[int(id)] = company
 def init():
     global holo_en
     global holo_id
@@ -44,12 +46,12 @@ def get_twitter_rules():
     rules = list()
 
     names = list(talents.values())
-    curr_rule = f'from:{names[0].split()[0]}'
+    curr_rule = f'from:{names}'
     for name in list(talents.values())[1:]:
-        test_rule = curr_rule +  f' OR from:{name.split()[0]}'
+        test_rule = curr_rule +  f' OR from:{name}'
         if len(test_rule) > 512:
             rules.append(curr_rule)
-            curr_rule = f'from:{name.split()[0]}'
+            curr_rule = f'from:{name}'
         else:
             curr_rule = test_rule
     return rules

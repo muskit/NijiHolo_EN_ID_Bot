@@ -7,6 +7,7 @@ import tweepy
 import api_secrets
 import talenttweet as tt
 import talent_lists as tl
+import ttweetqueue as ttq
 import util
 
 class TwAPI:
@@ -170,7 +171,7 @@ class TwAPI:
 
     async def post_tweet(self, text='', media_ids: list=None, reply_to_tweet: int=None, quote_tweet_id: int=None):
         try:
-            tweet = self.client.create_tweet(text=text, media_ids=media_ids, in_reply_to_tweet_id=reply_to_tweet, quote_tweet_id=str(quote_tweet_id))
+            tweet = self.client.create_tweet(text=text, media_ids=media_ids, in_reply_to_tweet_id=reply_to_tweet, quote_tweet_id=quote_tweet_id)
             return tweet
         except tweepy.TooManyRequests as e:
             wait_for = float(e.response.headers["x-rate-limit-reset"]) - datetime.datetime.now().timestamp() + 1
@@ -194,7 +195,7 @@ class TwAPI:
         RETWEET = '{0} retweeted {1}!\n'
 
         def create_text():
-            author_username = f'@/{util.get_username_local(ttweet.author_id)}'
+            author_username = f'@/{util.get_username_with_company(ttweet.author_id)}'
             print_mention_ids = set(ttweet.mentions)
             ret = str()
             if is_catchup:
@@ -203,14 +204,14 @@ class TwAPI:
             
             # Tweet types
             if ttweet.rt_target is not None: # retweet
-                ret += RETWEET.format(author_username, f'@/{util.get_username(ttweet.rt_author_id)}')
+                ret += RETWEET.format(f'{author_username}', f'@/{util.get_username_with_company(ttweet.rt_author_id)}')
             elif ttweet.reply_to is not None: # reply
-                reply_username = f'@/{util.get_username(ttweet.reply_to)}'
+                reply_username = f'@/{util.get_username_with_company(ttweet.reply_to)}'
                 ret += REPLY.format(author_username, reply_username)
                 # if qrt, push id into mentions
                 print_mention_ids.add(ttweet.quote_retweeted)
             elif ttweet.quote_retweeted is not None: # qrt
-                quoted_username = f'@/{util.get_username(ttweet.quote_retweeted)}'
+                quoted_username = f'@/{util.get_username_with_company(ttweet.quote_retweeted)}'
                 ret += QUOTE_TWEET.format(author_username, quoted_username)
             elif len(ttweet.mentions) > 0: # standalone tweet
                 ret += TWEET.format(author_username)
@@ -222,64 +223,67 @@ class TwAPI:
 
             # mention line
             if len(print_mention_ids) > 0:
-                mention_usernames = [f'@/{util.get_username(x)}' for x in print_mention_ids]
+                mention_usernames = [f'@/{util.get_username_with_company(x)}' for x in print_mention_ids]
                 ret += (
                     'mentioning '
                     f'{", ".join(mention_usernames)}\n'
                 )
             ret += '\n'
-            ret += '(this is a missed tweet)\n' if is_catchup else ''
+            # ret += '(this is a missed tweet)\n' if is_catchup else ''
             return ret
         
         text = create_text()
         ttweet_url = util.ttweet_to_url(ttweet)
         
-        if dry_run: # DRY-RUN: only print tweet
-            print('--------------- [DRY RUN] ---------------')
-            print(text)
-            print(f'QRT: {ttweet_url}')
-        else: # NO DRY-RUN: post actual tweet
-            # main tweet: text + screenshot
-            try:
-                print('creating main QRT w/ screenshot...', end='')
-                media_ids = [await self.get_ttweet_image_media_id(ttweet)]
-                twt_resp = await self.post_tweet(text, media_ids=media_ids, quote_tweet_id=ttweet.tweet_id)
-                print('done')
-                # twt_id = twt_resp.data['id']
-                # try:
-                #     print('posting reply tweet...', end='')
-                #     await self.post_tweet(text=ttweet_url, reply_to_tweet=twt_id)
-                #     print('done')
-                # except:
-                #     print('Had trouble posting reply tweet.')
-            except:
-                print('error occurred trying to create main tweet, falling back to URL-main + reply format')
-                text += f"\n{ttweet_url}"
-                try:
-                    print('posting main tweet...', end='')
-                    twt_resp = await self.post_tweet(text)
-                    print('done')
-                    twt_id = twt_resp.data['id']
-                    # if ttweet.reply_to is not None:
-                        # re_ttweet = tt.TalentTweet(tweet_id=ttweet.reply_to, author_id=)
-                        # media_ids.insert(0, await self.get_ttweet_image_media_id())
+        if dry_run: print('-------------------- DRY RUN --------------------')
+        print(text)
+        if dry_run: return
 
-                    try:
-                        print('creating reply img...', end='')
-                        media_ids = [await self.get_ttweet_image_media_id(ttweet)]
-                        print('posting reply tweet...', end='')
-                        await self.post_tweet(reply_to_tweet=twt_id, media_ids=media_ids,)
-                        print('done')
-                    except:
-                        print('Had trouble posting reply image tweet.')
-                    print('successfully posted ttweet!')
-                    return True
-                except tweepy.Forbidden as e:
-                    if 'duplicate content' in e.api_messages[0]:
-                        print('Twitter says the TalentTweet is a duplicate; skipping error-free...')
-                        return False
-                    else:
-                        raise e
+        # NO DRY-RUN: actually post tweet
+        # main tweet: text + screenshot
+        try:
+            print('creating main QRT w/ screenshot...', end='')
+            media_ids = [await self.get_ttweet_image_media_id(ttweet)]
+            twt_resp = await self.post_tweet(text, media_ids=media_ids, quote_tweet_id=ttweet.tweet_id)
+            print('done')
+        except:
+            print('error occurred trying to create main tweet, falling back to URL-main + reply screencap format')
+            text += f"\n{ttweet_url}"
+            try:
+                print('posting main tweet...', end='')
+                twt_resp = await self.post_tweet(text)
+                print('done')
+                twt_id = twt_resp.data['id']
+                # if ttweet.reply_to is not None:
+                    # re_ttweet = tt.TalentTweet(tweet_id=ttweet.reply_to, author_id=)
+                    # media_ids.insert(0, await self.get_ttweet_image_media_id())
+
+                try:
+                    print('creating reply img...', end='')
+                    media_ids = [await self.get_ttweet_image_media_id(ttweet)]
+                    print('posting reply tweet...', end='')
+                    await self.post_tweet(reply_to_tweet=twt_id, media_ids=media_ids)
+                    print('done')
+                except:
+                    print('Had trouble posting reply image tweet.')
+                print('successfully posted ttweet!')
+                return True
+            except tweepy.Forbidden as e:
+                if 'duplicate content' in e.api_messages[0]:
+                    print('Twitter says the TalentTweet is a duplicate; skipping error-free...')
+                    return False
+                else:
+                    raise e
+    
+    def post_ttweet_by_id(self, tweet_id, is_catchup=False, dry_run=False):
+        ttweet = asyncio.run(tt.TalentTweet.create_from_id(tweet_id))
+        print(f'm({ttweet.mentions}), r({ttweet.reply_to}), q({ttweet.quote_retweeted})')
+        if ttweet.is_cross_company():
+            print(f'Tweet {ttweet.tweet_id} is cross-company! Creating post...')
+            asyncio.run(self.post_ttweet(ttweet, is_catchup=is_catchup, dry_run=dry_run))
+            ttq.TalentTweetQueue.instance.add_finished_tweet(ttweet.tweet_id)
+        else:
+            print(f'Tweet {tweet_id} is not cross-company.')
 
 
 
