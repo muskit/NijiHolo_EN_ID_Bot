@@ -12,7 +12,4 @@ The bot may run in these modes:
 * Listen (`l`): listens for tweets from list, sharing it if it's cross-company
 * Command-line (`cmd`): an interactive mode for manual control and debugging (drops into Python interpretor)
 
-## TODOs
-* Fix catch-up mode (`TWINT` is broken yet again *\*sigh\**)
-
 *Created for the spirit of entertainment and in the name of unity.* ❤
