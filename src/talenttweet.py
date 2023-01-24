@@ -80,6 +80,7 @@ class TalentTweet:
     @staticmethod
     def create_from_v2api_response(resp):
         tweet = resp.data
+        if tweet is None: return None
         
         mrq = twapi.TwAPI.get_mrq(resp)
         rt_target = None

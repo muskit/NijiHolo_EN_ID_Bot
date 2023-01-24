@@ -16,6 +16,11 @@ errors_encountered = 0
 
 def on_response(resp):
     ttweet = TalentTweet.create_from_v2api_response(resp)
+    if ttweet is None:
+        print('Couldn\'t create ttweet from the response:')
+        print(resp)
+        return
+
     tweet_username = util.get_username(ttweet.author_id)
         
     if ttweet.is_cross_company():

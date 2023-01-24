@@ -248,6 +248,7 @@ class TwAPI:
             print('done')
         except:
             print('error occurred trying to create main tweet, falling back to URL-main + reply screencap format')
+            traceback.print_exc()
             text += f"\n{ttweet_url}"
             try:
                 print('posting main tweet...', end='')

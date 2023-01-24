@@ -54,4 +54,5 @@ def get_twitter_rules():
             curr_rule = f'from:{name}'
         else:
             curr_rule = test_rule
+    rules.append(curr_rule)
     return rules
