@@ -144,10 +144,4 @@ cython_debug/
 
 # project-specific (secret.ini: can't ignore existing file?)
 secrets.ini
-queue.txt
-img.png
-img_adjusted.png
-src/img.png
-_queue_backup.txt
-_current_ttweet.txt
-finished_ttweets.txt
+*.png
