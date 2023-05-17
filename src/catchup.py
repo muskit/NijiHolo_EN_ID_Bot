@@ -18,7 +18,7 @@ import talenttweet as tt
 import ttweetqueue as ttq
 
 PROGRAM_ARGS = None
-safe_to_post_tweets = True
+safe_to_post_tweets = False
 errored = False
 
 ## Returns the ID of all tweets (up to limit) from a user ID.
@@ -133,13 +133,10 @@ async def process_queue() -> bool:
 
 # return True = no problems
 # return False = issue occurred where we couldn't post all past tweets properly
-async def run(program_args):
-    global PROGRAM_ARGS
+async def run():
     global errored
     global safe_to_post_tweets
-    PROGRAM_ARGS = program_args
 
-    ret = None
     queue = ttq.TalentTweetQueue.instance
     while True:
         await get_cross_talent_tweets()

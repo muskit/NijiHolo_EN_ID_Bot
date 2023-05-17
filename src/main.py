@@ -24,9 +24,6 @@ def init_argparse():
     p = argparse.ArgumentParser(description='Twitter bot that follows interactions between Nijisanji EN/ID and hololive EN/ID members.', formatter_class=RawTextHelpFormatter)
     p.add_argument('mode', nargs='?', \
         help=MODES_HELP_STR)
-    p.add_argument('--show-tokens', action='store_true', help='[DO NOT USE IN PUBLIC SETTING] print stored tokens from secrets.ini')
-    p.add_argument('--announce-catchup', action='store_true', help='In catch-up mode, post a tweet announcing catch-up mode.')
-    p.add_argument('--auto-listen', action='store_true', help='In catch-up mode, transition to listen mode after successfuly catching up.')
     p.add_argument('--no-delay', action='store_true', help='In self-destruct mode, clear tweets without safety waiting.')
     return p
 
@@ -45,55 +42,28 @@ async def self_destruct():
 async def async_main():
     global PROGRAM_ARGS
 
-    ## Determine running mode
-    # match PROGRAM_ARGS.mode.lower():
-        # case 'l' | 'listen':
-        #     print('RUNNING IN LISTEN MODE\n')
-        #     await listen.run()
-        # case 'c' | 'catchup':
-        #     print('RUNNING IN CATCH-UP MODE\n')
-        #     if await catchup.run(PROGRAM_ARGS) and PROGRAM_ARGS.auto_listen:
-        #         print('CATCH-UP MODE DONE, GOING INTO LISTEN MODE')
-        #         await listen.run()
-        # case 'd' | 'delete-all':
-        #     print('WARNING: SELF-DESTRUCT MODE')
-        #     await self_destruct()
-        # case 'cmd':
-        #     command_line()
-        # case _:
-        #     print('\ninvalid mode. run with no arguments or "-h" for help page, including mode list.')
-        #     return
+    if PROGRAM_ARGS.mode == None:
+        await catchup.run()
+        return
+    
     mode = PROGRAM_ARGS.mode.lower()
-    if mode in ['l', 'listen']:
-        print('RUNNING IN LISTEN MODE')
-        await listen.run()
-    elif mode in ['c', 'catchup']:
-        print('RUNNING IN CATCH UP MODE')
-        if await catchup.run(PROGRAM_ARGS) and PROGRAM_ARGS.auto_listen:
-            print('CATCH UP MODE DONE, GOING INTO LISTEN MODE')
-            listen.run()
-    elif mode in ['d', 'delete-all']:
+    if mode in ['d', 'delete-all']:
         print('WARNING: SELF-DESTRUCT MODE')
         await self_destruct()
     elif mode == 'cmd':
         command_line()
     else:
-        print('\ninvalid mode. run with no arguments or -h for help and modes')
+        print('\nunknown mode. run with no arguments or -h for help and modes')
 
 def main():
     global PROGRAM_ARGS
 
     parser = init_argparse()
-    if len(sys.argv) < 2:
-        parser.print_help()
-        return
+    # if len(sys.argv) < 2:
+    #     parser.print_help()
+    #     return
 
     PROGRAM_ARGS = parser.parse_args()
-
-    if PROGRAM_ARGS.show_tokens:
-        print(api_secrets.get_all_secrets())
-
-    if PROGRAM_ARGS.mode is None: return
 
     ## We expect to run in some mode now.
 
