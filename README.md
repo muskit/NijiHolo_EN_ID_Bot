@@ -5,6 +5,22 @@ Twitter bot that tracks cross-company interactions between the non-JP branches o
 
 **This project was created to run [this account](https://twitter.com/NijiHolo_EN_ID).**
 
+## `.env`
+These need to be defined in a `.env` file at the project root (outside of `src`):
+```
+# Scweet (scraping)
+SCWEET_EMAIL=
+SCWEET_USERNAME=
+SCWEET_PASSWORD=
+
+# Twitter API bot keys (posting)
+api_key=
+api_secret=
+oauth1_access_token=
+oauth1_access_secret=
+bearer_token=
+```
+
 ## Running modes
 The bot may run in these modes:
 * Catch-up (`c`): intended to run only once, scan all accounts for cross-company tweets and post them. Terminate when done posting all.
