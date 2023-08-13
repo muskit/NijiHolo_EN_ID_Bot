@@ -1,11 +1,11 @@
 import util
 
-holo_en = dict()
-holo_id = dict()
-niji_en = dict()
-niji_exid = dict()
-talents = dict()
-talents_company = dict()
+holo_en = dict[int, str]
+holo_id = dict[int, str]
+niji_en = dict[int, str]
+niji_exid = dict[int, str]
+talents = dict[int, str]
+talents_company = dict[int, str]
 
 test_talents = dict()
 
@@ -40,6 +40,12 @@ def init():
     # TODO: nijiex-KR
 
     test_talents = holo_en
+
+def is_niji(id: int) -> bool:
+    return id in niji_en or id in niji_exid
+
+def is_holo(id: int) -> bool:
+    return id in holo_en or id in holo_id
 
 def get_twitter_rules():
     global talents

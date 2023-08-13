@@ -19,6 +19,12 @@
 1409819816194576394 tsukumosana
 1409817941705515015 nanashimumei_en
 
+# --- [Advent] ---
+1656536840240005121 shiorinovella
+1656528951303614464 nerissa_en
+1656889310472437761 fuwamoco_en
+1656531547279982593 kosekibijou
+
 # ----- HOLOSTARS EN  -----
 
 # --- [TEMPUS] ---
