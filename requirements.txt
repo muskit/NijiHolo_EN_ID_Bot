@@ -1,6 +1,6 @@
 python-dotenv
 nest-asyncio
 pytz
-Scweet
+tweety-ns
 tweet-capture
 opencv-python

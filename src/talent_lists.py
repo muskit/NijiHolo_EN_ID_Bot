@@ -47,6 +47,8 @@ def is_niji(id: int) -> bool:
 def is_holo(id: int) -> bool:
     return id in holo_en or id in holo_id
 
+# For filtered stream
+# DEPRECATED: thx elon
 def get_twitter_rules():
     global talents
     rules = list()
