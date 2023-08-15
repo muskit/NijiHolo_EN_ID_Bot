@@ -47,6 +47,9 @@ def is_niji(id: int) -> bool:
 def is_holo(id: int) -> bool:
     return id in holo_en or id in holo_id
 
+def is_cross_company(id1: int, id2: int):
+    return is_niji(id1) == is_holo(id2)
+
 # For filtered stream
 # DEPRECATED: thx elon
 def get_twitter_rules():

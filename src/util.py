@@ -8,7 +8,7 @@ from datetime import datetime
 import tweepy
 import pytz
 import twint
-import twapi
+#import twapi
 from tweetcapture import TweetCapture
 
 from recrop import fix_aspect_ratio

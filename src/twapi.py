@@ -124,35 +124,7 @@ class TwAPI:
     #     else:
     #         print('Saul Gone')
 
-    def get_all_tweet_ids_from_user(self, user_id):
-        next_page_token = None
-        tokens_retrieved = 0
-        tweets_retrieved = 0
-        tweets = list()
-        while True:
-            print(f'Retrieved {tokens_retrieved} tokens so far...')
-            resp = self.client.get_users_tweets(
-                user_id, max_results=100, pagination_token=next_page_token,
-                media_fields=TwAPI.TWEET_MEDIA_FIELDS,
-                tweet_fields=TwAPI.TWEET_FIELDS,
-                expansions=TwAPI.TWEET_EXPANSIONS
-            )
-
-            for tweet in resp.data:
-                tweets.append(tweet)
-
-            # update counters and pagination token
-            tweets_retrieved += resp.meta['result_count']
-            try:
-                next_page_token = resp.meta['next_token']
-                tokens_retrieved += 1
-            except KeyError:
-                print("next_token wasn't provided; we've reached the end!")
-                break  # reached end of user's tweets
-
-        print(f'Retrieved {tweets_retrieved} tweets using {tokens_retrieved} tokens.')
-        return tweets
-
+    # DEPRECATED: thx elon
     async def get_tweet_response(self, id, attempt = 0):
         try:
             twt = TwAPI.instance.client.get_tweet(
@@ -275,18 +247,3 @@ class TwAPI:
                 else:
                     raise e
         return True
-    
-    def post_ttweet_by_id(self, tweet_id, is_catchup=False, dry_run=False):
-        ttweet = asyncio.run(tt.TalentTweet.create_from_id(tweet_id))
-        print(f'm({ttweet.mentions}), r({ttweet.reply_to}), q({ttweet.quote_retweeted})')
-        if ttweet.is_cross_company():
-            print(f'Tweet {ttweet.tweet_id} is cross-company! Creating post...')
-            asyncio.run(self.post_ttweet(ttweet, is_catchup=is_catchup, dry_run=dry_run))
-            ttq.TalentTweetQueue.instance.add_finished_tweet(ttweet.tweet_id)
-        else:
-            print(f'Tweet {tweet_id} is not cross-company.')
-
-
-
-        
-        

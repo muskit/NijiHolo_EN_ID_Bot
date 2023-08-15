@@ -1,14 +1,33 @@
-import datetime
+from datetime import datetime
 from zoneinfo import ZoneInfo
 import platform
 
 import pytz
 
-import twapi
 import talent_lists
 import util
 
 class TalentTweet:
+    # Serialized one-liner format:
+    # {tweet} {author} {time in seconds since epoch} m {mention set} r {reply to author} q {quote tweet author} rt {retweeted tweet's id}
+    def serialize(self):
+        s = f'{self.tweet_id} {self.author_id} {self.date_time.timestamp()} '
+
+        if None not in [self.rt_target, self.rt_author_id]:
+            s += f'rt {self.rt_target} {self.rt_author_id}'
+            return s[:-1] # stop here since retweets can't have other info
+        
+        if len(self.mentions) > 0:
+            s += 'm '
+            for id in self.mentions:
+                s += f'{id} '
+        if self.reply_to:
+            s += f'r {self.reply_to} '
+        if self.quote_retweeted:
+            s += f'q {self.quote_retweeted} '
+            
+        return s[:-1]
+
     @staticmethod
     def deserialize(serialized_str: str):
         tokens = serialized_str.split()
@@ -16,7 +35,7 @@ class TalentTweet:
             raise ValueError('not enough tokens to reconstruct a TalentTweet')
         
         tweet_id, author_id = int(tokens[0]), int(tokens[1])
-        date_time = datetime.datetime.fromtimestamp(float(tokens[2]), tz=pytz.utc)
+        date_time = datetime.fromtimestamp(float(tokens[2]), tz=pytz.utc)
         
         mentions = set()
         reply_to = None
@@ -43,27 +62,7 @@ class TalentTweet:
             date_time=date_time, mrq=(mentions, reply_to, quote_retweeted)
         )
 
-    # Serialized one-liner format:
-    # {tweet} {author} {time in seconds since epoch} m {mention_set} r {reply_to_author} q {quote_retweet_author}
-    def serialize(self):
-        s = f'{self.tweet_id} {self.author_id} {self.date_time.timestamp()} '
-
-        if None not in [self.rt_target, self.rt_author_id]:
-            s += f'rt {self.rt_target} {self.rt_author_id}'
-            return s[:-1] # stop here since retweets can't have other info
-        
-        if len(self.mentions) > 0:
-            s += 'm '
-            for id in self.mentions:
-                s += f'{id} '
-        if self.reply_to:
-            s += f'r {self.reply_to} '
-        if self.quote_retweeted:
-            s += f'q {self.quote_retweeted} '
-            
-        return s[:-1]
-
-    def __init__(self, tweet_id: int, author_id: int, date_time: datetime.datetime, mrq: tuple, rt_target: int=None, rt_author_id: int=None):
+    def __init__(self, tweet_id: int, author_id: int, date_time: datetime, mrq: tuple, rt_target: int=None, rt_author_id: int=None):
         self.tweet_id, self.author_id = tweet_id, author_id
         self.date_time = date_time
         self.mentions = tuple(int(x) for x in mrq[0])
@@ -97,18 +96,8 @@ class TalentTweet:
 
     def is_cross_company(self):
         for other_id in self.all_parties:
-            if self.author_id in talent_lists.holo_en:
-                if other_id in talent_lists.niji_en or other_id in talent_lists.niji_exid:
-                    return True
-            if self.author_id in talent_lists.niji_en:
-                if other_id in talent_lists.holo_en or other_id in talent_lists.holo_id:
-                    return True
-            if self.author_id in talent_lists.holo_id:
-                if other_id in talent_lists.niji_en or other_id in talent_lists.niji_exid:
-                    return True
-            if self.author_id in talent_lists.niji_exid:
-                if other_id in talent_lists.holo_en or other_id in talent_lists.holo_id:
-                    return True
+            if talent_lists.is_cross_company(self.author_id, other_id):
+                return True
         return False
     
     def get_all_parties_usernames(self):
