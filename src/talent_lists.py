@@ -1,11 +1,11 @@
 import util
 
-holo_en = dict[int, str]
-holo_id = dict[int, str]
-niji_en = dict[int, str]
-niji_exid = dict[int, str]
-talents = dict[int, str]
-talents_company = dict[int, str]
+holo_en: dict[int, str] = dict()
+holo_id: dict[int, str] = dict()
+niji_en: dict[int, str] = dict()
+niji_exid: dict[int, str] = dict()
+talents: dict[int, str] = dict()
+talents_company: dict[int, str] = dict()
 
 test_talents = dict()
 
@@ -48,7 +48,7 @@ def is_holo(id: int) -> bool:
     return id in holo_en or id in holo_id
 
 def is_cross_company(id1: int, id2: int):
-    return is_niji(id1) == is_holo(id2)
+    return (is_niji(id1) and is_holo(id2)) or (is_holo(id1) and is_niji(id2))
 
 # For filtered stream
 # DEPRECATED: thx elon
