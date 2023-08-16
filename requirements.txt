@@ -1,7 +1,7 @@
 python-dotenv
 nest-asyncio
 pytz
-tweety-ns
+git+https://github.com/muskit/tweety-ns.git
 tweepy
 tweet-capture
 opencv-python
