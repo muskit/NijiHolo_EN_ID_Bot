@@ -101,20 +101,20 @@ def ttweet_to_url(ttweet):
 #     except:
 #         return str(default) if default is not None else f'{id}'
 
-def get_username_local(id):
+def get_username_local(id: int):
     return talent_lists.talents.get(id, f'{id}')
 
 # Retrieve username via API v2 (tweepy)
-def get_username_online(id, default=None):
-    try:
-        resp = twapi.TwAPI.instance.client.get_user(id=id)
-        return resp.data.username
-    except tweepy.TooManyRequests:
-        return str(default) if default is not None else f'id:{id}'
-    except:
-        print(f'Unhandled error retrieving username for {id}!')
-        traceback.print_exc()
-        return str(default) if default is not None else f'id:{id}'
+# def get_username_online(id, default=None):
+#     try:
+#         resp = twapi.TwAPI.instance.client.get_user(id=id)
+#         return resp.data.username
+#     except tweepy.TooManyRequests:
+#         return str(default) if default is not None else f'id:{id}'
+#     except:
+#         print(f'Unhandled error retrieving username for {id}!')
+#         traceback.print_exc()
+#         return str(default) if default is not None else f'id:{id}'
 
 ## Attempt to pull username from local; pull from online if doesn't exist.
 def get_username(id):

@@ -7,8 +7,13 @@ def print_tweets(tweets: list[Tweet | TweetThread]):
 	print(f'{len(tweets)} tweets:')
 	for t in tweets:
 		if isinstance(t, Tweet):
-			print(f'{t.date} : {url(t)} : RT? {t.is_retweet} ', end=' ')
+			print(f'{t.date} : {url(t)} :', end=' ')
 
+			if t.is_retweet:
+				print(f'RT ({t.retweeted_tweet.author.username})', end=' ')
+
+			if t.is_reply:
+				print(f'is reply!', end=' ')
 			if t.replied_to is not None:
 				print(f'reply to {t.replied_to.author.username}', end=' ')
 

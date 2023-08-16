@@ -3,8 +3,9 @@ from zoneinfo import ZoneInfo
 import platform
 
 import pytz
+from tweety.types import *
 
-import talent_lists
+from talent_lists import is_cross_company
 import util
 
 class TalentTweet:
@@ -13,8 +14,8 @@ class TalentTweet:
     def serialize(self):
         s = f'{self.tweet_id} {self.author_id} {self.date_time.timestamp()} '
 
-        if None not in [self.rt_target, self.rt_author_id]:
-            s += f'rt {self.rt_target} {self.rt_author_id}'
+        if self.rt_author_id != None:
+            s += f'rt {self.rt_id} {self.rt_author_id}'
             return s[:-1] # stop here since retweets can't have other info
         
         if len(self.mentions) > 0:
@@ -61,14 +62,35 @@ class TalentTweet:
             tweet_id=tweet_id, author_id=author_id,
             date_time=date_time, mrq=(mentions, reply_to, quote_retweeted)
         )
+    
+    ## Creates a TalentTweet from a Tweety-library Tweet.
+    @staticmethod
+    def create_from_tweety(tweety: Tweet):
+        return TalentTweet(
+            tweet_id=int(tweety.id), author_id=int(tweety.author.id),
+            date_time=tweety.date, text=tweety.text,
+            mrq=(
+                [int(x.id) for x in tweety.user_mentions],
+                int(tweety._original_tweet['in_reply_to_user_id_str']) if tweety.is_reply else None,
+                int(tweety.quoted_tweet.author.id) if tweety.quoted_tweet is not None else None
+            ),
+            rt_author_id=tweety.retweeted_tweet.author.id if tweety.is_retweet else None,
+            rt_mentions=[int(x.id) for x in tweety.retweeted_tweet.user_mentions] if tweety.is_retweet else list()
+        )
 
-    def __init__(self, tweet_id: int, author_id: int, date_time: datetime, mrq: tuple, rt_target: int=None, rt_author_id: int=None):
+    def __init__(self, tweet_id: int, author_id: int, date_time: datetime, text: str = None, mrq: tuple[list[int], int|None, int|None]=None, rt_author_id: int=None, rt_mentions: list[int]=None):
+        # basic information
         self.tweet_id, self.author_id = tweet_id, author_id
+        self.username = util.get_username_local(self.author_id)
         self.date_time = date_time
-        self.mentions = tuple(int(x) for x in mrq[0])
-        self.reply_to = int(mrq[1]) if mrq[1] is not None else None
-        self.quote_retweeted = int(mrq[2]) if mrq[2] is not None else None
-        self.rt_target, self.rt_author_id = rt_target, rt_author_id
+        self.text = text
+
+        # filter twitter users to only be cross-company
+        self.mentions = {x for x in mrq[0] if is_cross_company(author_id, x)}
+        self.reply_to = mrq[1] if mrq[1] is not None and is_cross_company(author_id, mrq[1]) else None
+        self.quote_retweeted = mrq[2] if mrq[2] is not None and is_cross_company(author_id, mrq[2]) else None
+        self.rt_mentions = {x for x in rt_mentions if is_cross_company(author_id, x)} if rt_mentions is not None else None
+        self.rt_author_id = rt_author_id if (rt_author_id is not None and is_cross_company(author_id, rt_author_id)) or (len(self.rt_mentions) > 0) else None
 
         # all users involved, except for the author
         self.all_parties = {self.reply_to, self.quote_retweeted}
@@ -83,20 +105,24 @@ class TalentTweet:
 
     def __repr__(self) -> str:
         return (
-            f'{self.tweet_id} from {util.get_username_local(self.author_id)}):\n'
+            f'======================================================'
+            f'{self.tweet_id} from {self.username}:\n'
             f'{self.get_datetime_str()}\n'
-            f'{self.get_all_parties_usernames()}\n'
+            f'parties: {self.get_all_parties_usernames()}\n'
             f'mentions: {self.mentions}\n'
             f'reply_to: {self.reply_to}\n'
             f'quote_retweeted: {self.quote_retweeted}\n'
-            f'Cross-company: {self.is_cross_company()}\n'
+            f'cross-company? {self.is_cross_company()}\n'
             f'{self.serialize()}\n'
-            f'======================================================'
+            f'{self.url()}'
         )
+
+    def url(self):
+        return f'https://www.twitter.com/{self.username}/status/{self.tweet_id}'
 
     def is_cross_company(self):
         for other_id in self.all_parties:
-            if talent_lists.is_cross_company(self.author_id, other_id):
+            if is_cross_company(self.author_id, other_id):
                 return True
         return False
     

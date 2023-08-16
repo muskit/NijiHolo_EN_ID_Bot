@@ -7,93 +7,95 @@ import pytz
 
 from tweety import Twitter
 from tweety.types import *
+from tweety.exceptions_ import *
+from tweety.filters import SearchFilters
 
 from tweety_utils import *
 from talenttweet import *
-from talent_lists import is_niji, is_holo
+import talent_lists
 
 class Scraper:
 	def __init__(self):
 		creds = dotenv_values()
 		self.app = Twitter("session")
-		if exists("session.json"):
-			self.app.connect()
-		else:
-			self.app.sign_in(creds["scraper_username"], creds["scraper_password"])
+		# if exists("session.json"):
+		# 	self.app.connect()
+		# else:
+		self.app.sign_in(creds["scraper_username"], creds["scraper_password"])
 
 	# since MUST BE TIMEZONE AWARE
 	# usage example: since=datetime(2023, 8, 1).replace(tzinfo=pytz.utc)
-	def get_tweets_from_user(self, uid: int | str, since: datetime = None) -> list:
+	def get_tweets_from_user(self, username: str, since: datetime = None) -> list[Tweet]:
 		reached_backdate = False
 		tweets: list[Tweet] = []
+		cur = None
 
 		if since == None:
 			since = datetime.utcnow().replace(tzinfo=pytz.utc) - timedelta(days=7)
-			print(f'Grabbing tweets since 7 days ago ({since.date()})')
+			print(f'falling back to grabbing tweets since 7 days ago ({since.date()})')
+		else:
+			print(f'grabbing tweets since {since.date()}')
 
-		if isinstance(uid, str):
-			name = uid
-			uid = self.app._get_user_id(uid)
-			print(f"{name} = {uid}")
+		uid = self.app._get_user_id(username)
+		print(f"{username} = {uid}")
 
 		def add_tweet(tweet: Tweet):
+			# malformed tweet check
 			nonlocal reached_backdate
 			try:
 				tweet.author
-				tweets.append(tweet)
-				if not reached_backdate and tweet.date <= since:
-					print("reached backdate")
-					reached_backdate = True
 			except AttributeError:
 				print("skipping malformed tweet: {tweet}")
 				return
 
-		uts = self.app.get_tweets(uid, replies=True)
+			# fix reply if it exists
+			# if tweet.is_reply and tweet.replied_to is None:
+			# 	tweet.replied_to = self.app.tweet_detail(tweet._original_tweet['in_reply_to_status_id_str'])
+			tweets.append(tweet)
+
+			if not reached_backdate and int(tweet.author.id) == uid and tweet.date <= since:
+				print("reached backdate")
+				reached_backdate = True
+
 		while not reached_backdate:
-			cur_page = uts.tweets
-			print(f'obtained {len(cur_page)} tweets')
+			try:
+				# uts = self.app.get_tweets(uid, replies=True, cursor=cur)
+				search = self.app.search(f'from:{username}', filter_=SearchFilters.Latest(), cursor=cur)
+				cur_page = search.tweets
+				print(f'obtained {len(cur_page)} tweets')
 
-			if len(cur_page) == 0: break
+				if len(cur_page) == 0: break
 
-			for e in cur_page:
-				if isinstance(e, Tweet):
-					add_tweet(e)
-				elif isinstance(e, TweetThread):
-					# FIXME: rework when replied_to is fixed (currently only user_mentions works)
-					t = e[-1] # latest tweet in thread = og author's reply
-					t.replied_to = e[-2]
-					add_tweet(t)
-					print(f"adding thread latest: {t.id}")
-
-			uts = self.app.get_tweets(uid, replies=True, cursor=uts.cursor)
+				for e in cur_page:
+					if isinstance(e, Tweet):
+						add_tweet(e)
+					elif isinstance(e, TweetThread):
+						# FIXME: rework when replied_to is fixed (currently populates user_mentions)
+						# latest tweet in thread = og author's reply
+						add_tweet(e[0])
+						for t in e:
+							add_tweet(t)
+				
+				cur = search.cursor
+			except UnknownError:
+				print("UnknownError occurred, probably rate-limited")
+				print("sleeping for 1 minute...")
+				sleep(60)
 		
 		tweets.sort(key=lambda t: t.id)
 		return tweets
 	
-	def get_cross_ttweets_from_user(self, uid: int | str, since: datetime = None):
-		tweets = self.get_tweets_from_user(uid, since)
-		ret: [TalentTweet] = []
+	def get_cross_ttweets_from_user(self, username: str, since: datetime = None) -> list[TalentTweet]:
+		tweets = self.get_tweets_from_user(username, since)
+		print_tweets(tweets)
+		ret: list[TalentTweet] = []
 		for t in tweets:
-			is_niji = is_niji(int(t.author.id))
-			is_cross = False
+			tt = TalentTweet.create_from_tweety(t)
+			if tt.is_cross_company():
+				ret.append(tt)
+		return ret
 
-			# cross-rt?
-			
-			# rt mentions cross-company?
-
-			# cross-qrt?
-
-			# cross-reply?
-			if t.replied_to is not None:
-				if is_niji == is_holo(int(t.replied_to.author.id)):
-					is_cross = True
-
-			# cross-mention? in-thread?
-			for u in t.user_mentions:
-				if is_niji == is_holo(int(u.id)):
-					is_cross = True
-
-if __name__ == '__main__':
-	app = Scraper()
-	tweets = app.get_tweets_from_user("pomurainpuff")
-	print_tweets(tweets)
+talent_lists.init()
+s = Scraper()
+ttweets = s.get_cross_ttweets_from_user("pomurainpuff", since=datetime(2023, 7, 30).replace(tzinfo=pytz.utc))
+print("\n".join([x.__repr__() for x in ttweets]))

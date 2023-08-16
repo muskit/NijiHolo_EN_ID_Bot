@@ -175,7 +175,7 @@ class TwAPI:
                 pass
             
             # Tweet types
-            if ttweet.rt_target is not None: # retweet
+            if ttweet.rt_id is not None: # retweet
                 ret += RETWEET.format(f'{author_username}', f'@/{util.get_username_with_company(ttweet.rt_author_id)}')
             elif ttweet.reply_to is not None: # reply
                 reply_username = f'@/{util.get_username_with_company(ttweet.reply_to)}'
