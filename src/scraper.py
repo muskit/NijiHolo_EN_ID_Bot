@@ -112,8 +112,8 @@ class Scraper:
 				print("UnknownError occurred, probably rate-limited")
 				# traceback.print_exc()
 				if not self.try_login():
-					print("sleeping for 1 minute...")
-					sleep(60)
+					print("sleeping for 2 minutes...")
+					sleep(120)
 					print()
 					self.try_login()
 		
