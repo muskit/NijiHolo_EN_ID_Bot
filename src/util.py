@@ -45,7 +45,7 @@ def get_current_timestamp():
 def get_current_date():
     return datetime.today().strftime('%Y-%m-%d')
 
-def get_key_from_value(d, val):
+def get_key_from_value(d: dict, val):
     keys = [k for k, v in d.items() if v == val]
     if keys:
         return keys[0]
@@ -101,21 +101,6 @@ def ttweet_to_url(ttweet):
 #     except:
 #         return str(default) if default is not None else f'{id}'
 
-def get_username_local(id: int):
-    return talent_lists.talents.get(id, f'{id}')
-
-# Retrieve username via API v2 (tweepy)
-# def get_username_online(id, default=None):
-#     try:
-#         resp = twapi.TwAPI.instance.client.get_user(id=id)
-#         return resp.data.username
-#     except tweepy.TooManyRequests:
-#         return str(default) if default is not None else f'id:{id}'
-#     except:
-#         print(f'Unhandled error retrieving username for {id}!')
-#         traceback.print_exc()
-#         return str(default) if default is not None else f'id:{id}'
-
 ## Attempt to pull username from local; pull from online if doesn't exist.
 def get_username(id):
     ret = talent_lists.talents.get(id, None)
@@ -127,21 +112,17 @@ def get_username_with_company(id):
     company = talent_lists.talents_company.get(id, None)
     return f'{get_username(id)} {f"({company})" if company is not None else ""}'
 
-def get_user_id_local(username) -> int:
-    talent_usernames = list(talent_lists.talents.values())
-    for i in range(0, len(talent_usernames)):
-        if username.lower() == talent_usernames[i].lower():
-            return list(talent_lists.talents)[i]
-    
-def get_user_id_online(username) -> int:
-    c = twint.Config()
-    c.Username = username
-    c.Store_object = True
-    c.Hide_output = True
+def get_username_local(id: int):
+    return talent_lists.talents.get(id, f'{id}')
+
+# Retrieve username via API v2 (tweepy)
+def get_username_online(id, default=None):
     try:
-        twint.output.users_list.clear()
-        twint.run.Lookup(c)
-        user = twint.output.users_list[0]
-        return user.id
+        resp = twapi.TwAPI.instance.client.get_user(id=id)
+        return resp.data.username
+    except tweepy.TooManyRequests:
+        return str(default) if default is not None else f'id:{id}'
     except:
-        return -1
+        print(f'Unhandled error retrieving username for {id}!')
+        traceback.print_exc()
+        return str(default) if default is not None else f'id:{id}'

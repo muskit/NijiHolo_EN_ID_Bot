@@ -124,23 +124,6 @@ class TwAPI:
     #     else:
     #         print('Saul Gone')
 
-    # DEPRECATED: thx elon
-    async def get_tweet_response(self, id, attempt = 0):
-        try:
-            twt = TwAPI.instance.client.get_tweet(
-                id,
-                media_fields=TwAPI.TWEET_MEDIA_FIELDS,
-                tweet_fields=TwAPI.TWEET_FIELDS,
-                expansions=TwAPI.TWEET_EXPANSIONS
-            )
-            TwAPI.tweets_fetched += 1
-            return twt
-        except tweepy.TooManyRequests as e:
-            wait_for = float(e.response.headers["x-rate-limit-reset"]) - datetime.datetime.now().timestamp() + 1
-            print(f'[{attempt}]\tget_tweet_response({id}):\n\thit rate limit after {TwAPI.tweets_fetched} fetches -- trying again in {wait_for} seconds...')
-            await asyncio.sleep(wait_for)
-            return await self.get_tweet_response(id, attempt=attempt+1)
-
     async def post_tweet(self, text='', media_ids: list=None, reply_to_tweet: int=None, quote_tweet_id: int=None):
         try:
             tweet = self.client.create_tweet(text=text, media_ids=media_ids, in_reply_to_tweet_id=reply_to_tweet, quote_tweet_id=quote_tweet_id)
@@ -160,55 +143,12 @@ class TwAPI:
     # return False = did not post ttweet (duplicate)
     async def post_ttweet(self, ttweet: tt.TalentTweet, is_catchup=False, dry_run=False):
         print(f'------{ttweet.tweet_id} ({util.get_username_local(ttweet.author_id)})------')
-
-        REPLY = '{0} replied to {1}!\n'
-        QUOTE_TWEET = '{0} quote tweeted {1}!\n'
-        TWEET = '{0} tweeted!\n'
-        RETWEET = '{0} retweeted {1}!\n'
-
-        def create_text():
-            author_username = f'@/{util.get_username_with_company(ttweet.author_id)}'
-            print_mention_ids = set(ttweet.mentions)
-            ret = str()
-            if is_catchup:
-                ret += f'{ttweet.get_datetime_str()}\n'
-                pass
-            
-            # Tweet types
-            if ttweet.rt_id is not None: # retweet
-                ret += RETWEET.format(f'{author_username}', f'@/{util.get_username_with_company(ttweet.rt_author_id)}')
-            elif ttweet.reply_to is not None: # reply
-                reply_username = f'@/{util.get_username_with_company(ttweet.reply_to)}'
-                ret += REPLY.format(author_username, reply_username)
-                # if qrt, push id into mentions
-                print_mention_ids.add(ttweet.quote_retweeted)
-            elif ttweet.quote_retweeted is not None: # qrt
-                quoted_username = f'@/{util.get_username_with_company(ttweet.quote_retweeted)}'
-                ret += QUOTE_TWEET.format(author_username, quoted_username)
-            elif len(ttweet.mentions) > 0: # standalone tweet
-                ret += TWEET.format(author_username)
-            else:
-                raise ValueError(f'TalentTweet {ttweet.tweet_id} has insufficient other parties')
-
-            try: print_mention_ids.remove(None)
-            except: pass
-
-            # mention line
-            if len(print_mention_ids) > 0:
-                mention_usernames = [f'@/{util.get_username_with_company(x)}' for x in print_mention_ids]
-                ret += (
-                    'mentioning '
-                    f'{", ".join(mention_usernames)}\n'
-                )
-            ret += '\n'
-            # ret += '(this is a missed tweet)\n' if is_catchup else ''
-            return ret
         
-        text = create_text()
-        ttweet_url = util.ttweet_to_url(ttweet)
+        text = ttweet.announce_text()
+        ttweet_url = ttweet.url()
         
         if dry_run: print('-------------------- DRY RUN --------------------')
-        print(text)
+        print(ttweet)
         if dry_run: return False
 
         # NO DRY-RUN: actually post tweet

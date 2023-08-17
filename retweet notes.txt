@@ -1,0 +1,16 @@
+possible combinations which involve a "target cross-tweeter" B
+
+A retweets B
+	- B's tweet may have cross-mentions (B1, B2, etc.)
+	- rt_author_id=B; rt_mentions=B1,B2,...
+A retweets tweet mentioning B
+	- rt_author_id=...; rt_mentions=B...
+
+A quotes a tweet from B
+	- B's tweet may have cross-mentions (B1, B2, etc.)
+	- quote_retweeted=B; rt_mentions=B1,B2,...
+A quotes a tweet mentioning B
+	- quote_retweeted=...; rt_mentions=B...
+
+-- NO --
+A retweets a tweet that quotes a tweet mentioning B?
