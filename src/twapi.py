@@ -2,9 +2,9 @@ import datetime
 import traceback
 import asyncio
 
+from dotenv import dotenv_values
 import tweepy
 
-import api_secrets
 import talenttweet as tt
 import talent_lists as tl
 import ttweetqueue as ttq
@@ -70,24 +70,25 @@ class TwAPI:
 
 
     def __init__(self):
+        creds = dotenv_values()
         TwAPI.instance = self
         self.client = tweepy.Client(
-            bearer_token=api_secrets.bearer_token(),
-            consumer_key=api_secrets.api_key(), consumer_secret=api_secrets.api_secret(),
-            access_token=api_secrets.access_token(), access_token_secret=api_secrets.access_secret()
+            consumer_key=creds['app_key'], consumer_secret=creds['app_secret'],
+            access_token=creds['user_token'], access_token_secret=creds['user_secret']
         )
-        self.api = tweepy.API(
-            auth=tweepy.OAuthHandler(
-                consumer_key=api_secrets.api_key(), consumer_secret=api_secrets.api_secret(),
-                access_token=api_secrets.access_token(), access_token_secret=api_secrets.access_secret()
-            )
-        )
-        try:
-            self.me = self.client.get_me().data
-        except Exception as e:
-            print('Did you setup secrets.ini?')
-            raise e
-        print(f'Assuming the account of @{self.me.data["username"]} ({self.me["id"]})')
+        # self.api = tweepy.API(
+        #     auth=tweepy.OAuthHandler(
+        #         consumer_key=api_secrets.api_key(), consumer_secret=api_secrets.api_secret(),
+        #         access_token=api_secrets.access_token(), access_token_secret=api_secrets.access_secret()
+        #     )
+        # )
+        
+        # try:
+        #     self.me = self.client.get_me(wait_on_rate_limit=True).data
+        # except Exception as e:
+        #     print('Failed to login!')
+        #     raise e
+        # print(f'Assuming the account of @{self.me.data["username"]} ({self.me["id"]})')
     
     ## ---[COMMENT OUT WHEN NOT IN USE]---
     # async def nuke_tweets(self):
@@ -154,17 +155,16 @@ class TwAPI:
         # NO DRY-RUN: actually post tweet
         # main tweet: text + screenshot
         try:
-            print('creating main QRT w/ screenshot...', end='')
+            print('creating main QRT w/ screenshot...')
             media_ids = [await self.get_ttweet_image_media_id(ttweet)]
             twt_resp = await self.post_tweet(text, media_ids=media_ids, quote_tweet_id=ttweet.tweet_id)
             print('done')
         except:
             print('error occurred trying to create main tweet, falling back to URL-main + reply screencap format')
             traceback.print_exc()
-            text += f"\n{ttweet_url}"
             try:
-                print('posting main tweet...', end='')
-                twt_resp = await self.post_tweet(text)
+                print('posting main tweet...')
+                twt_resp = await self.post_tweet(text, quote_tweet_id=ttweet.tweet_id)
                 print('done')
                 twt_id = twt_resp.data['id']
                 # if ttweet.reply_to is not None:

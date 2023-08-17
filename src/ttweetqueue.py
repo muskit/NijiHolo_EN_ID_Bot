@@ -1,6 +1,7 @@
 # TODO: move queue structures and file handling here
 import os
 import shutil
+import traceback
 
 import util
 import talenttweet as tt
@@ -55,9 +56,12 @@ class TalentTweetQueue:
                     if len(tokens) == 0 or tokens[0][0] == '#':
                         continue
                     ttweet = tt.TalentTweet.deserialize(line)
+                    # print(f'{ttweet.tweet_id}:\n{ttweet}')
                     self.ttweets_dict[ttweet.tweet_id] = ttweet
                 print(f'Found {len(self.finished_user_dates)} scraped accounts and {len(self.ttweets_dict)} tweets in queue.')
-        except: pass
+        except:
+            traceback.print_exc()
+            pass
         # finished ttweets
         try:
             with open(self.finished_ttweets_path, 'r') as f:

@@ -8,7 +8,6 @@ import nest_asyncio
 
 import talent_lists
 import ttweetqueue as ttq
-import api_secrets
 import catchup
 import listen
 from twapi import TwAPI
@@ -52,6 +51,8 @@ async def async_main():
         await self_destruct()
     elif mode == 'cmd':
         command_line()
+    elif mode in ['l', 'listen']:
+        listen.run()
     else:
         print('\nunknown mode. run with no arguments or -h for help and modes')
 
@@ -59,9 +60,9 @@ def main():
     global PROGRAM_ARGS
 
     parser = init_argparse()
-    # if len(sys.argv) < 2:
-    #     parser.print_help()
-    #     return
+    if len(sys.argv) < 2:
+        parser.print_help()
+        return
 
     PROGRAM_ARGS = parser.parse_args()
 
@@ -77,6 +78,7 @@ def main():
     ttq.TalentTweetQueue()
 
     ## Asynchronous execution
+    print('beginning async main')
     nest_asyncio.apply()
     asyncio.run(async_main())
     

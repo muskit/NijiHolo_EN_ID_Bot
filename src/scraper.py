@@ -2,7 +2,6 @@ from os.path import exists
 from time import sleep
 from datetime import datetime, timedelta
 
-from dotenv import dotenv_values
 import pytz
 
 from tweety import Twitter
@@ -10,18 +9,33 @@ from tweety.types import *
 from tweety.exceptions_ import *
 from tweety.filters import SearchFilters
 
+from account_pool import AccountPool
 from tweety_utils import *
 from talenttweet import *
 import talent_lists
 
 class Scraper:
 	def __init__(self):
-		creds = dotenv_values()
-		self.app = Twitter("session")
-		# if exists("session.json"):
-		# 	self.app.connect()
-		# else:
-		self.app.sign_in(creds["scraper_username"], creds["scraper_password"])
+		Scraper.instance = self
+		self.__account = AccountPool()
+		self.try_login()
+	
+	def try_login(self) -> bool:
+		acc = self.__account.next()
+		if acc is not None:
+			name = acc[0]
+			print(f"using {name}")
+			self.app = Twitter(name)
+			if exists(f"{name}.json"):
+				try:
+					self.app.connect()
+				except:
+					self.app.sign_in(*acc)	
+			else:
+				self.app.sign_in(*acc)
+			return True
+		print('exhausted all accounts!')
+		return False
 
 	# since MUST BE TIMEZONE AWARE
 	# usage example: since=datetime(2023, 8, 1).replace(tzinfo=pytz.utc)
@@ -43,10 +57,28 @@ class Scraper:
 			# malformed tweet check
 			nonlocal reached_backdate
 			try:
-				tweet.author
-			except AttributeError:
-				print("skipping malformed tweet: {tweet}")
+				tweet.author.id
+			except:
+				print(f"skipping malformed tweet: {tweet}")
 				return
+
+			# recover lost info
+			if tweet.is_retweet:
+				if tweet.retweeted_tweet is None:
+					print(f'{tweet.author.username}/{tweet.id} is missing the RT! Recovering...')
+					tweet.retweeted_tweet = self.app.tweet_detail(str(tweet.id)).retweeted_tweet
+				if tweet.retweeted_tweet.author is None:
+					print(f'WARNING: {tweet.author.username}/{tweet.id} is missing the RT author! Recovering details...')
+					tweet.retweeted_tweet = self.app.tweet_detail(tweet.retweeted_tweet.id)
+
+			if tweet.is_quoted:
+				if tweet.quoted_tweet is None: # quoted tweet is deleted
+					# print(f'{tweet.author.username}/{tweet.id} is missing the QRT! Recovering...')
+					# tweet.quoted_tweet = self.app.tweet_detail(str(tweet.id)).quoted_tweet
+					tweet.is_quoted = False
+				elif tweet.quoted_tweet.author is None:
+					print(f'WARNING: {tweet.author.username}/{tweet.id} is missing the QRT author! Recovering details...')
+					tweet.quoted_tweet= self.app.tweet_detail(tweet.quoted_tweet.id)
 
 			# fix reply if it exists
 			# if tweet.is_reply and tweet.replied_to is None:
@@ -72,22 +104,30 @@ class Scraper:
 					elif isinstance(e, TweetThread):
 						# FIXME: rework when replied_to is fixed (currently populates user_mentions)
 						# latest tweet in thread = og author's reply
-						add_tweet(e[0])
 						for t in e:
 							add_tweet(t)
 				
 				cur = search.cursor
 			except UnknownError:
 				print("UnknownError occurred, probably rate-limited")
-				print("sleeping for 1 minute...")
-				sleep(60)
+				# traceback.print_exc()
+				if not self.try_login():
+					print("sleeping for 1 minute...")
+					sleep(60)
+					print()
+					self.try_login()
 		
 		tweets.sort(key=lambda t: t.id)
 		return tweets
 	
-	def get_cross_ttweets_from_user(self, username: str, since: datetime = None) -> list[TalentTweet]:
+	def get_cross_ttweets_from_user(self, username: str, since_date: str = None) -> list[TalentTweet]:
+		if since_date is not None:
+			d = since_date.split('-')
+			since = datetime(*[int(x) for x in d]).replace(tzinfo=pytz.utc)
+		else:
+			since = None
 		tweets = self.get_tweets_from_user(username, since)
-		print_tweets(tweets)
+		# print_tweets(tweets)
 		ret: list[TalentTweet] = []
 		for t in tweets:
 			tt = TalentTweet.create_from_tweety(t)
@@ -95,7 +135,8 @@ class Scraper:
 				ret.append(tt)
 		return ret
 
-talent_lists.init()
-s = Scraper()
-ttweets = s.get_cross_ttweets_from_user("pomurainpuff", since=datetime(2023, 7, 30).replace(tzinfo=pytz.utc))
-print("\n".join([x.__repr__() for x in ttweets]))
+if __name__== '__main__':
+	talent_lists.init()
+	s = Scraper()
+	ttweets = s.get_cross_ttweets_from_user("pomurainpuff", since=datetime(2023, 7, 30).replace(tzinfo=pytz.utc))
+	print("\n".join([x.__repr__() for x in ttweets]))

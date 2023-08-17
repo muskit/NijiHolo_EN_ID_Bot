@@ -38,9 +38,11 @@ class TalentTweet:
 
     @staticmethod
     def deserialize(serialized_str: str):
-        tokens = serialized_str.split('#')[0]
-        if len(tokens) < 3:
+        token_check = serialized_str.split('#')[0]
+        if len(token_check) < 3:
             raise ValueError('not enough tokens to reconstruct a TalentTweet')
+        
+        tokens = serialized_str.split()
         
         tweet_id, author_id = int(tokens[0]), int(tokens[1])
         date_time = datetime.fromtimestamp(float(tokens[2]), tz=pytz.utc)
@@ -59,7 +61,7 @@ class TalentTweet:
         
             if tokens[i].isnumeric():
                 if mode == 'm': # mentions
-                    mentions.add(int(tokens[i]))
+                    mentions.append(int(tokens[i]))
                     continue
                 if mode == 'r': # reply_to
                     reply_to = int(tokens[i])
@@ -69,7 +71,7 @@ class TalentTweet:
                 if mode == 'rt': # retweeted user
                     rt = int(tokens[i])
                 if mode == 'rtm': # retweet/qrt mentions
-                    rtm = int(tokens[i])
+                    rtm.append(int(tokens[i]))
         
         return TalentTweet(
             tweet_id=tweet_id, author_id=author_id,
@@ -168,15 +170,20 @@ class TalentTweet:
     def announce_text(self, is_catchup=False):
         # templates
         REPLY = '{0} replied to {1}!'
-        TWEET = '{0} tweeted!'
+        TWEET = '{0} tweeted mentioning {1}!'
         RETWEET = '{0} retweeted {1}!'
-        RETWEET_MENTIONS_B = '{0} shared a tweet mentioning{1}!'
+        RETWEET_MENTIONS_B = '{0} shared a tweet mentioning {1}!'
         QUOTE_TWEET = '{0} quote tweeted {1}!'
         QUOTE_TWEET_MENTIONS_B = '{0} quoted a tweet mentioning {1}!'
 
         author_username = f'@/{util.get_username_with_company(self.author_id)}'
         ret = str()
+
         print_mention_ids = set(self.mentions)
+        try: print_mention_ids.remove(None)
+        except: pass
+        mention_usernames = [f'@/{util.get_username_with_company(x)}' for x in print_mention_ids]
+
         if is_catchup:
             ret += f'{self.get_datetime_str()}\n'
             pass
@@ -198,16 +205,13 @@ class TalentTweet:
             else:
                 ret += QUOTE_TWEET.format(author_username, quoted_username)
         elif len(self.mentions) > 0: # standalone tweet
-            ret += TWEET.format(author_username)
+            ret += TWEET.format(author_username, ", ".join(mention_usernames))
+            return ret
         else:
             raise ValueError(f'TalentTweet {self.tweet_id} has insufficient other parties')
 
-        try: print_mention_ids.remove(None)
-        except: pass
-
         # mention line
         if len(print_mention_ids) > 0:
-            mention_usernames = [f'@/{util.get_username_with_company(x)}' for x in print_mention_ids]
             ret += (
                 '\nMentioning '
                 f'{", ".join(mention_usernames)}'
