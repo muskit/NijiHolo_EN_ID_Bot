@@ -34,7 +34,6 @@ async def get_cross_tweets_online():
         for i, (talent_id, talent_username) in enumerate(talent_lists.talents.items()):
             print(f'[{i+1}/{len(talent_lists.talents)}] {talent_username}-----------------------------------')
             try:
-                # tweets = get_user_tweets(talent_id, since_date=queue.finished_user_dates.get(talent_id, None))
                 since_date = queue.finished_user_dates.get(talent_id, None)
                 ttweets = scraper.get_cross_ttweets_from_user(talent_username, since_date=since_date)
                 print(f'got {len(ttweets)} TalentTweets')
@@ -48,8 +47,6 @@ async def get_cross_tweets_online():
                 print('Error occurred processing tweet data.')
                 safe_to_post_tweets = False
                 traceback.print_exc()
-                if talent_id not in queue.finished_user_dates:
-                    queue.finished_user_dates[talent_id] = '2023-04-26' # date is when bot token first got revoked 
             else:
                 queue.finished_user_dates[talent_id] = util.get_current_date()
                 queue.save_file()
