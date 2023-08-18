@@ -68,7 +68,7 @@ async def create_ttweet_image(ttweet):
         img = await tc.screenshot(
             url=url,
             path=filename,
-            mode=0,
+            mode=4,
             night_mode=1,
             show_parent_tweets=True
         )
