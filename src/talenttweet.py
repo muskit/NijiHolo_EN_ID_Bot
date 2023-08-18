@@ -190,11 +190,11 @@ class TalentTweet:
         mention_usernames = [f'@/{util.get_username_with_company(x)}' for x in print_mention_ids]
 
         def rtm_msg(TEMPLATE: str, rtm_author_username: str):
-            if self.rt_author_id != -1: # rtm tweet is not from talent; rtm should be everyone
+            if self.rt_author_id != -1: # rtm tweet is from talent; rtm should be everyone
                 rtm_names = [f'@/{util.get_username_with_company(x)}' for x in self.rt_mentions]
                 between = f' from {rtm_author_username} '
                 ret += TEMPLATE.format(author_username, between, ", ".join(rtm_names))
-            else: # rtm tweet is from a talent; rtm should just be cross company
+            else: # rtm tweet is not from a talent; rtm should just be cross company
                 rtm_names = [f'@/{util.get_username_with_company(x)}' for x in self.rt_mentions if tl.is_cross_company(self.author_id, x)]
                 ret += TEMPLATE.format(author_username, ' ', ", ".join(rtm_names))
 
