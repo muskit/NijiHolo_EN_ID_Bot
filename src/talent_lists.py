@@ -6,6 +6,7 @@ niji_en: dict[int, str] = dict()
 niji_exid: dict[int, str] = dict()
 talents: dict[int, str] = dict()
 talents_company: dict[int, str] = dict()
+privated_accounts: dict[int, str] = dict()
 
 test_talents = dict()
 
@@ -16,12 +17,15 @@ def __create_dict(file, _dict, company):
     with open(file, 'r') as f:
         for line in f:
             words = line.split()
-            if len(words) == 2 and line[0] != '#':
-                id, name = line.split()
+            if len(words) >= 2 and line[0] != '#':
+                t = line.split()
+                id, name = int(t[0]), t[1]
                 # name = f'{util.get_username_online(id, default=name)}' # attempt to get updated name
-                talents[int(id)] = name
-                _dict[int(id)] = name
-                talents_company[int(id)] = company
+                talents[id] = name
+                _dict[id] = name
+                talents_company[id] = company
+                if len(words) > 2 and words[2] == 'p':
+                    privated_accounts[id] = name
 def init():
     global holo_en
     global holo_id
@@ -36,7 +40,7 @@ def init():
     # nijiEN
     __create_dict(f'{util.get_project_dir()}/lists/nijien.txt', niji_en, 'nijiEN')
     # nijiexID
-    __create_dict(f'{util.get_project_dir()}/lists/nijiexid.txt', niji_exid, 'nijiex-ID')
+    __create_dict(f'{util.get_project_dir()}/lists/nijiexid.txt', niji_exid, 'nijiex\'ID')
     # TODO: nijiex-KR
 
     test_talents = holo_en

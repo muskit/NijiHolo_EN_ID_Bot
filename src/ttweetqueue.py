@@ -74,8 +74,8 @@ class TalentTweetQueue:
         return self.get_count() <= 0
 
     def add_ttweet(self, ttweet):
-        self.__sorted = False
         self.ttweets_dict[ttweet.tweet_id] = ttweet
+        self.__sorted = False
 
     def get_ttweet(self, id):
         return self.ttweets_dict[id]
@@ -84,7 +84,10 @@ class TalentTweetQueue:
         self.is_good = False
         if os.path.exists(self.current_ttweet_path):
             with open(self.current_ttweet_path, 'r') as f:
-                return tt.TalentTweet.deserialize(f.readline())
+                ttweet = tt.TalentTweet.deserialize(f.readline())
+                if ttweet.tweet_id in self.ttweets_dict:
+                    self.ttweets_dict.pop(ttweet.tweet_id)
+                return ttweet
 
         self.__sort_ttweets_dict()
         key = list(self.ttweets_dict.keys())[0]
@@ -109,6 +112,7 @@ class TalentTweetQueue:
     
     # overwrite queue.txt
     def save_file(self):
+        print('saving file...', end='')
         shutil.copyfile(self.queue_path, self.queue_backup_path)
         self.__sort_ttweets_dict()
         with open(self.queue_path, 'w') as f:
@@ -121,6 +125,7 @@ class TalentTweetQueue:
             # write sorted ttweets
             for ttweet in self.ttweets_dict.values():
                 f.write(ttweet.serialize() + '\n')
+        print('done')
 
     def add_finished_tweet(self, id):
         self.finished_ttweets.append(id)

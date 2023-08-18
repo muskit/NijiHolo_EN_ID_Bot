@@ -20,8 +20,12 @@ class Scraper:
 		self.__account = AccountPool()
 		self.try_login()
 	
-	def try_login(self) -> bool:
-		acc = self.__account.next()
+	def try_login(self, account_idx: int = None) -> bool:
+		if account_idx is not None:
+			acc = self.__account.use_index(account_idx)
+		else:
+			acc = self.__account.next()
+
 		if acc is not None:
 			name = acc[0]
 			print(f"using {name}")
@@ -65,9 +69,10 @@ class Scraper:
 			# recover lost info
 			if tweet.is_retweet:
 				if tweet.retweeted_tweet is None:
-					print(f'{tweet.author.username}/{tweet.id} is missing the RT! Recovering...')
-					tweet.retweeted_tweet = self.app.tweet_detail(str(tweet.id)).retweeted_tweet
-				if tweet.retweeted_tweet.author is None:
+					print(f'{tweet.author.username}/{tweet.id} is missing the RT! It\'s probably nothing...')
+					# tweet.retweeted_tweet = self.app.tweet_detail(str(tweet.id)).retweeted_tweet
+					tweet.is_retweet = False
+				elif tweet.retweeted_tweet.author is None:
 					print(f'WARNING: {tweet.author.username}/{tweet.id} is missing the RT author! Recovering details...')
 					tweet.retweeted_tweet = self.app.tweet_detail(tweet.retweeted_tweet.id)
 
@@ -78,16 +83,19 @@ class Scraper:
 					tweet.is_quoted = False
 				elif tweet.quoted_tweet.author is None:
 					print(f'WARNING: {tweet.author.username}/{tweet.id} is missing the QRT author! Recovering details...')
-					tweet.quoted_tweet= self.app.tweet_detail(tweet.quoted_tweet.id)
+					tweet.quoted_tweet = self.app.tweet_detail(tweet.quoted_tweet.id)
 
 			# fix reply if it exists
 			# if tweet.is_reply and tweet.replied_to is None:
-			# 	tweet.replied_to = self.app.tweet_detail(tweet._original_tweet['in_reply_to_status_id_str'])
+			# 	tweet.replied_to = self.app.tweet_detail(tweet.original_tweet['in_reply_to_status_id_str'])
 			tweets.append(tweet)
 
 			if not reached_backdate and int(tweet.author.id) == uid and tweet.date <= since:
 				print("reached backdate")
 				reached_backdate = True
+
+		if uid in talent_lists.privated_accounts:
+			self.try_login(0)
 
 		while not reached_backdate:
 			try:
@@ -110,8 +118,14 @@ class Scraper:
 				cur = search.cursor
 			except UnknownError:
 				print("UnknownError occurred, probably rate-limited")
-				# traceback.print_exc()
-				if not self.try_login():
+				if uid in talent_lists.privated_accounts:
+					print("sticking pvt-accessible account. sleeping for 2 minutes...")
+					sleep(120)
+					print()
+					l = self.try_login(0)
+				else:
+					l = self.try_login()
+				if not l:
 					print("sleeping for 2 minutes...")
 					sleep(120)
 					print()

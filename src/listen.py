@@ -9,13 +9,13 @@ import catchup
 
 errors_encountered = 0
 
-def run():
+def run(PROGRAM_ARGS):
     global errors_encountered
     while True:
         try:
-            asyncio.run(catchup.run())
-            print('Sleeping for 30 minutes...')
-            sleep(1800) # run every half-hour
+            asyncio.run(catchup.run(PROGRAM_ARGS))
+            print('Sleeping for 10 minutes...')
+            sleep(60*10) # run every 10 minutes
         except KeyboardInterrupt:
             print('Interrupt signal received. Exiting listen mode.')
             print(f'{errors_encountered} errors encountered throughout session.')

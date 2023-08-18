@@ -5,7 +5,8 @@ import platform
 import pytz
 from tweety.types import *
 
-from talent_lists import is_cross_company
+# from talent_lists import is_cross_company, talents
+import talent_lists as tl
 import util
 
 class TalentTweet:
@@ -94,7 +95,7 @@ class TalentTweet:
             date_time=tweety.date, text=tweety.text,
             mrq=(
                 [int(x.id) for x in tweety.user_mentions],
-                int(tweety._original_tweet['in_reply_to_user_id_str']) if tweety.is_reply else None,
+                int(tweety.original_tweet['in_reply_to_user_id_str']) if tweety.is_reply else None,
                 int(tweety.quoted_tweet.author.id) if tweety.quoted_tweet is not None else None
             ),
             rt_author_id=tweety.retweeted_tweet.author.id if tweety.is_retweet else None,
@@ -108,14 +109,21 @@ class TalentTweet:
         self.date_time = date_time
         self.text = text
 
-        # filter twitter users to only be cross-company
-        self.mentions = {x for x in mrq[0] if is_cross_company(author_id, x)}
-        self.reply_to = mrq[1] if mrq[1] is not None and is_cross_company(author_id, mrq[1]) else None
-        self.quote_tweeted = mrq[2]
+        # filter users to only be talents
+        self.mentions = {x for x in mrq[0] if x in tl.talents}
+        self.rt_mentions = {x for x in rt_mentions if x in tl.talents}
 
-        # rt'd/quoted tweet contains cross-company names?
-        self.rt_mentions = {x for x in rt_mentions if is_cross_company(author_id, x)}
+        self.reply_to = mrq[1]
+        self.quote_tweeted = mrq[2]
         self.rt_author_id = rt_author_id
+
+        try: self.mentions.remove(self.reply_to)
+        except: pass
+
+        # -1 if user is not in company
+        self.reply_to = self.reply_to if self.reply_to is None or self.reply_to in tl.talents else -1
+        self.quote_tweeted = self.quote_tweeted if self.quote_tweeted is None or self.quote_tweeted in tl.talents else -1
+        self.rt_author_id = self.rt_author_id if self.rt_author_id is None or self.rt_author_id in tl.talents else -1
 
         # all users involved except for the author
         self.all_parties = {self.reply_to, self.quote_tweeted, rt_author_id}
@@ -123,10 +131,6 @@ class TalentTweet:
         try: self.all_parties.remove(None)
         except: pass
         try: self.all_parties.remove(self.author_id)
-        except: pass
-
-        # clean up mentions
-        try: self.mentions.remove(self.reply_to)
         except: pass
     
 
@@ -146,11 +150,11 @@ class TalentTweet:
         )
 
     def url(self):
-        return f'https://www.twitter.com/{self.username}/status/{self.tweet_id}'
+        return util.get_tweet_url(self.tweet_id, self.username)
 
     def is_cross_company(self):
         for other_id in self.all_parties:
-            if is_cross_company(self.author_id, other_id):
+            if tl.is_cross_company(self.author_id, other_id):
                 return True
         return False
     
@@ -167,14 +171,15 @@ class TalentTweet:
         unpad = '#' if platform.system() == 'Windows' else '-'
         return self.date_time.strftime(f'%b %{unpad}d %Y, %{unpad}I:%M%p (%Z)')
 
-    def announce_text(self, is_catchup=False):
+    def announce_text(self):
         # templates
-        REPLY = '{0} replied to {1}!'
         TWEET = '{0} tweeted mentioning {1}!'
+        REPLY = '{0} replied to {1}!'
+        REPLY_TO_MENTION_B = '{0} replied to a tweet{1}mentioning {1}!' #########################
         RETWEET = '{0} retweeted {1}!'
-        RETWEET_MENTIONS_B = '{0} shared a tweet mentioning {1}!'
+        RETWEET_MENTIONS_B = '{0} shared a tweet{1}mentioning {2}!' #########################
         QUOTE_TWEET = '{0} quote tweeted {1}!'
-        QUOTE_TWEET_MENTIONS_B = '{0} quoted a tweet mentioning {1}!'
+        QUOTED_TWEET_MENTIONS_B = '{0} quoted a tweet{1}mentioning {2}!' #########################
 
         author_username = f'@/{util.get_username_with_company(self.author_id)}'
         ret = str()
@@ -184,28 +189,37 @@ class TalentTweet:
         except: pass
         mention_usernames = [f'@/{util.get_username_with_company(x)}' for x in print_mention_ids]
 
-        if is_catchup:
-            ret += f'{self.get_datetime_str()}\n'
-            pass
-        
-        rt_mention_names = [util.get_username_with_company(x) for x in self.rt_mentions]
+        def rtm_msg(TEMPLATE: str, rtm_author_username: str):
+            if self.rt_author_id != -1: # rtm tweet is not from talent; rtm should be everyone
+                rtm_names = [f'@/{util.get_username_with_company(x)}' for x in self.rt_mentions]
+                between = f' from {rtm_author_username} '
+                ret += TEMPLATE.format(author_username, between, ", ".join(rtm_names))
+            else: # rtm tweet is from a talent; rtm should just be cross company
+                rtm_names = [f'@/{util.get_username_with_company(x)}' for x in self.rt_mentions if tl.is_cross_company(self.author_id, x)]
+                ret += TEMPLATE.format(author_username, ' ', ", ".join(rtm_names))
+
         # Tweet types
         if self.rt_author_id is not None: # retweet
+            rt_username = f'@/{util.get_username_with_company(self.rt_author_id)}' if self.rt_author_id != -1 else None
             if len(self.rt_mentions) > 0:
-                ret += RETWEET_MENTIONS_B.format(author_username, ", ".join(rt_mention_names))
+                rtm_msg(RETWEET_MENTIONS_B, rt_username)
             else:
-                ret += RETWEET.format(f'{author_username}', f'@/{util.get_username_with_company(self.rt_author_id)}')
+                ret += RETWEET.format(author_username, rt_username)
         elif self.reply_to is not None: # reply
-            reply_username = f'@/{util.get_username_with_company(self.reply_to)}'
-            ret += REPLY.format(author_username, reply_username)
-        elif self.quote_tweeted is not None: # qrt
-            quoted_username = f'@/{util.get_username_with_company(self.quote_tweeted)}'
+            reply_username = f'@/{util.get_username_with_company(self.reply_to)}' if self.reply_to != -1 else None
             if len(self.rt_mentions) > 0:
-                ret += QUOTE_TWEET_MENTIONS_B.format(author_username, ", ".join(rt_mention_names))
+                rtm_msg(REPLY_TO_MENTION_B, reply_username)
+            else:
+                ret += REPLY.format(author_username, reply_username)
+        elif self.quote_tweeted is not None: # qrt
+            quoted_username = f'@/{util.get_username_with_company(self.quote_tweeted)}' if self.quote_tweeted != -1 else None
+            if len(self.rt_mentions) > 0:
+                rtm_msg(QUOTED_TWEET_MENTIONS_B, quoted_username)
             else:
                 ret += QUOTE_TWEET.format(author_username, quoted_username)
         elif len(self.mentions) > 0: # standalone tweet
             ret += TWEET.format(author_username, ", ".join(mention_usernames))
+            f'[{self.get_datetime_str()}]\n'
             return ret
         else:
             raise ValueError(f'TalentTweet {self.tweet_id} has insufficient other parties')
@@ -217,4 +231,5 @@ class TalentTweet:
                 f'{", ".join(mention_usernames)}'
             )
         
+        ret += f'\n\n{self.get_datetime_str()}'
         return ret

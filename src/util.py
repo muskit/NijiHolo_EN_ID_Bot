@@ -4,11 +4,12 @@ import os
 import sys
 import traceback
 from datetime import datetime
+from dotenv import dotenv_values
 
 import tweepy
 import pytz
 import twint
-#import twapi
+import twapi
 from tweetcapture import TweetCapture
 
 from recrop import fix_aspect_ratio
@@ -53,11 +54,12 @@ def get_key_from_value(d: dict, val):
 
 async def create_ttweet_image(ttweet):
     tc = TweetCapture()
+    tc.cookies = [{'name': 'auth_token', 'value': dotenv_values()['web_auth_token']}]
     if 'linux' in sys.platform:
         # Linux chromedriver path
         tc.driver_path = '/usr/bin/chromedriver'
     filename = f'{get_project_dir()}/img.png'
-    url = ttweet_to_url(ttweet)
+    url = ttweet.url()
     img = None
     print(url)
     try: os.remove(filename)
@@ -66,7 +68,7 @@ async def create_ttweet_image(ttweet):
         img = await tc.screenshot(
             url=url,
             path=filename,
-            mode=4,
+            mode=0,
             night_mode=1,
             show_parent_tweets=True
         )
@@ -80,26 +82,7 @@ async def create_ttweet_image(ttweet):
         return img
 
 def get_tweet_url(id, username):
-    return f'https://twitter.com/{username}/status/{id}'
-
-def ttweet_to_url(ttweet):
-    username = get_username(ttweet.author_id)
-    return get_tweet_url(ttweet.tweet_id, username)
-
-# twint
-# May not work with short user IDs (ie. 1354241437)
-# def get_username_online(id, default=None):
-#     c = twint.Config()
-#     c.User_id = id
-#     c.Store_object = True
-#     c.Hide_output = True
-#     try:
-#         twint.output.users_list.clear()
-#         twint.run.Lookup(c)
-#         user = twint.output.users_list[0]
-#         return user.username
-#     except:
-#         return str(default) if default is not None else f'{id}'
+    return f'https://www.twitter.com/{username}/status/{id}'
 
 ## Attempt to pull username from local; pull from online if doesn't exist.
 def get_username(id):

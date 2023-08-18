@@ -76,54 +76,18 @@ class TwAPI:
             consumer_key=creds['app_key'], consumer_secret=creds['app_secret'],
             access_token=creds['user_token'], access_token_secret=creds['user_secret']
         )
-        # self.api = tweepy.API(
-        #     auth=tweepy.OAuthHandler(
-        #         consumer_key=api_secrets.api_key(), consumer_secret=api_secrets.api_secret(),
-        #         access_token=api_secrets.access_token(), access_token_secret=api_secrets.access_secret()
-        #     )
-        # )
+        self.api = tweepy.API(
+            auth=tweepy.OAuthHandler(
+                consumer_key=creds['app_key'], consumer_secret=creds['app_secret'],
+                access_token=creds['user_token'], access_token_secret=creds['user_secret']
+            )
+        )
         
-        # try:
-        #     self.me = self.client.get_me(wait_on_rate_limit=True).data
-        # except Exception as e:
-        #     print('Failed to login!')
-        #     raise e
-        # print(f'Assuming the account of @{self.me.data["username"]} ({self.me["id"]})')
-    
-    ## ---[COMMENT OUT WHEN NOT IN USE]---
-    # async def nuke_tweets(self):
-    #     async def delete_tweet(id):
-    #         try:
-    #             self.client.delete_tweet(id)
-    #         except tweepy.TooManyRequests as e:
-    #             wait_for = float(e.response.headers["x-rate-limit-reset"]) - datetime.datetime.now().timestamp() + 1
-    #             print(f'\thit rate limit deleting {id}, retrying in {wait_for} seconds...')
-    #             await asyncio.sleep(wait_for)
-    #             print('continuing...')
-    #             await delete_tweet(id)
-
-    #     print(f'Retrieving all of {self.me["username"]}\'s tweets...')
-    #     tweets = self.get_all_tweet_ids_from_user(self.me['id'])
-
-    #     print(f'Retrieved {len(tweets)} tweets.')
-    #     if not len(tweets) > 0:
-    #         print('No tweets obtained. Make sure the profile is public.')
-    #         return
-
-    #     print(f'Deleting {len(tweets)} tweets...')
-    #     deleted_count = 0
-    #     try:
-    #         for tweet in tweets:
-    #             print(f'deleted {deleted_count}/{len(tweets)}')
-    #             await delete_tweet(tweet.id)
-    #             await asyncio.sleep(0.5)
-    #             deleted_count += 1
-    #     except:
-    #         print('Unhandled error occurred while trying to delete tweets.')
-    #         traceback.print_exc()
-    #         print('Try running again.')
-    #     else:
-    #         print('Saul Gone')
+        try:
+            self.me = self.client.get_me().data
+            print(f'Assuming the account of @{self.me.data["username"]} ({self.me["id"]})')
+        except:
+            pass
 
     async def post_tweet(self, text='', media_ids: list=None, reply_to_tweet: int=None, quote_tweet_id: int=None):
         try:
@@ -142,7 +106,7 @@ class TwAPI:
 
     # return True = successfully posted a single ttweet
     # return False = did not post ttweet (duplicate)
-    async def post_ttweet(self, ttweet: tt.TalentTweet, is_catchup=False, dry_run=False):
+    async def post_ttweet(self, ttweet: tt.TalentTweet, dry_run=False):
         print(f'------{ttweet.tweet_id} ({util.get_username_local(ttweet.author_id)})------')
         
         text = ttweet.announce_text()
@@ -167,9 +131,6 @@ class TwAPI:
                 twt_resp = await self.post_tweet(text, quote_tweet_id=ttweet.tweet_id)
                 print('done')
                 twt_id = twt_resp.data['id']
-                # if ttweet.reply_to is not None:
-                    # re_ttweet = tt.TalentTweet(tweet_id=ttweet.reply_to, author_id=)
-                    # media_ids.insert(0, await self.get_ttweet_image_media_id())
 
                 try:
                     print('creating reply img...', end='')

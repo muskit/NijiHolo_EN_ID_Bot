@@ -18,6 +18,10 @@ class AccountPool:
             else:
                 break
     
+    def use_index(self, idx):
+        self.__idx = idx
+        return self.current()
+
     def current(self):
         if 0 <= self.__idx < len(self.__accounts):
             return self.__accounts[self.__idx]

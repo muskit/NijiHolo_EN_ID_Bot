@@ -15,44 +15,34 @@ from twapi import TwAPI
 PROGRAM_ARGS = None
 
 MODES_HELP_STR = '''mode to run the bot at:
-l,listen:      listen for new tweets from all accounts; will not terminate unless error occurs
-c,catchup:     scan all tweets from all accounts; will terminate when done
-d,delete-all:  delete all tweets on account provided by secrets.ini; make sure the function is uncommented in twapi.py'''
+<blank>      scrape accounts in lists and post cross-company tweets if relevant
+cmd          drop into Python interpretor with access to initialized variables'''
 
 def init_argparse():
     p = argparse.ArgumentParser(description='Twitter bot that follows interactions between Nijisanji EN/ID and hololive EN/ID members.', formatter_class=RawTextHelpFormatter)
-    p.add_argument('mode', nargs='?', \
-        help=MODES_HELP_STR)
-    p.add_argument('--no-delay', action='store_true', help='In self-destruct mode, clear tweets without safety waiting.')
+    p.add_argument('mode', nargs='?', help=MODES_HELP_STR)
+    p.add_argument('--no-listen', action='store_true', help='Run one scraping-posting cycle without waiting to run again.')
+    p.add_argument('--straight-to-queue', action='store_true', help='Go through queue first before attempting to pull tweets.')
     return p
 
 def command_line():
     # TODO (extra): implement command line mode for manually controlling the bot
-    print('Shell coming soon. For now, here\'s a Python interpretor.')
+    print('Here\'s a Python interpretor.')
     code.interact(local=globals())
-    pass
-
-async def self_destruct():
-    if not PROGRAM_ARGS.no_delay:
-        print('\033[31;6m-----DELETING ALL TWEETS IN 10 SECONDS!! PRESS CTRL+C TO CANCEL.-----\033[0m')
-        await asyncio.sleep(10)
-    await TwAPI.instance.nuke_tweets()
 
 async def async_main():
     global PROGRAM_ARGS
 
     if PROGRAM_ARGS.mode == None:
-        await catchup.run()
+        if PROGRAM_ARGS.no_listen:
+            await catchup.run(PROGRAM_ARGS)
+        else:
+            listen.run(PROGRAM_ARGS)
         return
     
     mode = PROGRAM_ARGS.mode.lower()
-    if mode in ['d', 'delete-all']:
-        print('WARNING: SELF-DESTRUCT MODE')
-        await self_destruct()
-    elif mode == 'cmd':
+    if mode == 'cmd':
         command_line()
-    elif mode in ['l', 'listen']:
-        listen.run()
     else:
         print('\nunknown mode. run with no arguments or -h for help and modes')
 
@@ -66,8 +56,6 @@ def main():
 
     PROGRAM_ARGS = parser.parse_args()
 
-    ## We expect to run in some mode now.
-
     # Initialize shared API instance
     TwAPI()
 
@@ -78,7 +66,6 @@ def main():
     ttq.TalentTweetQueue()
 
     ## Asynchronous execution
-    print('beginning async main')
     nest_asyncio.apply()
     asyncio.run(async_main())
     
