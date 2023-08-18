@@ -2,9 +2,9 @@ import datetime
 import traceback
 import asyncio
 
+from dotenv import dotenv_values
 import tweepy
 
-import api_secrets
 import talenttweet as tt
 import talent_lists as tl
 import ttweetqueue as ttq
@@ -70,104 +70,24 @@ class TwAPI:
 
 
     def __init__(self):
+        creds = dotenv_values()
         TwAPI.instance = self
         self.client = tweepy.Client(
-            bearer_token=api_secrets.bearer_token(),
-            consumer_key=api_secrets.api_key(), consumer_secret=api_secrets.api_secret(),
-            access_token=api_secrets.access_token(), access_token_secret=api_secrets.access_secret()
+            consumer_key=creds['app_key'], consumer_secret=creds['app_secret'],
+            access_token=creds['user_token'], access_token_secret=creds['user_secret']
         )
         self.api = tweepy.API(
             auth=tweepy.OAuthHandler(
-                consumer_key=api_secrets.api_key(), consumer_secret=api_secrets.api_secret(),
-                access_token=api_secrets.access_token(), access_token_secret=api_secrets.access_secret()
+                consumer_key=creds['app_key'], consumer_secret=creds['app_secret'],
+                access_token=creds['user_token'], access_token_secret=creds['user_secret']
             )
         )
+        
         try:
             self.me = self.client.get_me().data
-        except Exception as e:
-            print('Did you setup secrets.ini?')
-            raise e
-        print(f'Assuming the account of @{self.me.data["username"]} ({self.me["id"]})')
-    
-    ## ---[COMMENT OUT WHEN NOT IN USE]---
-    # async def nuke_tweets(self):
-    #     async def delete_tweet(id):
-    #         try:
-    #             self.client.delete_tweet(id)
-    #         except tweepy.TooManyRequests as e:
-    #             wait_for = float(e.response.headers["x-rate-limit-reset"]) - datetime.datetime.now().timestamp() + 1
-    #             print(f'\thit rate limit deleting {id}, retrying in {wait_for} seconds...')
-    #             await asyncio.sleep(wait_for)
-    #             print('continuing...')
-    #             await delete_tweet(id)
-
-    #     print(f'Retrieving all of {self.me["username"]}\'s tweets...')
-    #     tweets = self.get_all_tweet_ids_from_user(self.me['id'])
-
-    #     print(f'Retrieved {len(tweets)} tweets.')
-    #     if not len(tweets) > 0:
-    #         print('No tweets obtained. Make sure the profile is public.')
-    #         return
-
-    #     print(f'Deleting {len(tweets)} tweets...')
-    #     deleted_count = 0
-    #     try:
-    #         for tweet in tweets:
-    #             print(f'deleted {deleted_count}/{len(tweets)}')
-    #             await delete_tweet(tweet.id)
-    #             await asyncio.sleep(0.5)
-    #             deleted_count += 1
-    #     except:
-    #         print('Unhandled error occurred while trying to delete tweets.')
-    #         traceback.print_exc()
-    #         print('Try running again.')
-    #     else:
-    #         print('Saul Gone')
-
-    def get_all_tweet_ids_from_user(self, user_id):
-        next_page_token = None
-        tokens_retrieved = 0
-        tweets_retrieved = 0
-        tweets = list()
-        while True:
-            print(f'Retrieved {tokens_retrieved} tokens so far...')
-            resp = self.client.get_users_tweets(
-                user_id, max_results=100, pagination_token=next_page_token,
-                media_fields=TwAPI.TWEET_MEDIA_FIELDS,
-                tweet_fields=TwAPI.TWEET_FIELDS,
-                expansions=TwAPI.TWEET_EXPANSIONS
-            )
-
-            for tweet in resp.data:
-                tweets.append(tweet)
-
-            # update counters and pagination token
-            tweets_retrieved += resp.meta['result_count']
-            try:
-                next_page_token = resp.meta['next_token']
-                tokens_retrieved += 1
-            except KeyError:
-                print("next_token wasn't provided; we've reached the end!")
-                break  # reached end of user's tweets
-
-        print(f'Retrieved {tweets_retrieved} tweets using {tokens_retrieved} tokens.')
-        return tweets
-
-    async def get_tweet_response(self, id, attempt = 0):
-        try:
-            twt = TwAPI.instance.client.get_tweet(
-                id,
-                media_fields=TwAPI.TWEET_MEDIA_FIELDS,
-                tweet_fields=TwAPI.TWEET_FIELDS,
-                expansions=TwAPI.TWEET_EXPANSIONS
-            )
-            TwAPI.tweets_fetched += 1
-            return twt
-        except tweepy.TooManyRequests as e:
-            wait_for = float(e.response.headers["x-rate-limit-reset"]) - datetime.datetime.now().timestamp() + 1
-            print(f'[{attempt}]\tget_tweet_response({id}):\n\thit rate limit after {TwAPI.tweets_fetched} fetches -- trying again in {wait_for} seconds...')
-            await asyncio.sleep(wait_for)
-            return await self.get_tweet_response(id, attempt=attempt+1)
+            print(f'Assuming the account of @{self.me.data["username"]} ({self.me["id"]})')
+        except:
+            pass
 
     async def post_tweet(self, text='', media_ids: list=None, reply_to_tweet: int=None, quote_tweet_id: int=None):
         try:
@@ -186,78 +106,31 @@ class TwAPI:
 
     # return True = successfully posted a single ttweet
     # return False = did not post ttweet (duplicate)
-    async def post_ttweet(self, ttweet: tt.TalentTweet, is_catchup=False, dry_run=False):
+    async def post_ttweet(self, ttweet: tt.TalentTweet, dry_run=False):
         print(f'------{ttweet.tweet_id} ({util.get_username_local(ttweet.author_id)})------')
-
-        REPLY = '{0} replied to {1}!\n'
-        QUOTE_TWEET = '{0} quote tweeted {1}!\n'
-        TWEET = '{0} tweeted!\n'
-        RETWEET = '{0} retweeted {1}!\n'
-
-        def create_text():
-            author_username = f'@/{util.get_username_with_company(ttweet.author_id)}'
-            print_mention_ids = set(ttweet.mentions)
-            ret = str()
-            if is_catchup:
-                ret += f'{ttweet.get_datetime_str()}\n'
-                pass
-            
-            # Tweet types
-            if ttweet.rt_target is not None: # retweet
-                ret += RETWEET.format(f'{author_username}', f'@/{util.get_username_with_company(ttweet.rt_author_id)}')
-            elif ttweet.reply_to is not None: # reply
-                reply_username = f'@/{util.get_username_with_company(ttweet.reply_to)}'
-                ret += REPLY.format(author_username, reply_username)
-                # if qrt, push id into mentions
-                print_mention_ids.add(ttweet.quote_retweeted)
-            elif ttweet.quote_retweeted is not None: # qrt
-                quoted_username = f'@/{util.get_username_with_company(ttweet.quote_retweeted)}'
-                ret += QUOTE_TWEET.format(author_username, quoted_username)
-            elif len(ttweet.mentions) > 0: # standalone tweet
-                ret += TWEET.format(author_username)
-            else:
-                raise ValueError(f'TalentTweet {ttweet.tweet_id} has insufficient other parties')
-
-            try: print_mention_ids.remove(None)
-            except: pass
-
-            # mention line
-            if len(print_mention_ids) > 0:
-                mention_usernames = [f'@/{util.get_username_with_company(x)}' for x in print_mention_ids]
-                ret += (
-                    'mentioning '
-                    f'{", ".join(mention_usernames)}\n'
-                )
-            ret += '\n'
-            # ret += '(this is a missed tweet)\n' if is_catchup else ''
-            return ret
         
-        text = create_text()
-        ttweet_url = util.ttweet_to_url(ttweet)
+        text = ttweet.announce_text()
+        ttweet_url = ttweet.url()
         
         if dry_run: print('-------------------- DRY RUN --------------------')
-        print(text)
+        print(ttweet)
         if dry_run: return False
 
         # NO DRY-RUN: actually post tweet
         # main tweet: text + screenshot
         try:
-            print('creating main QRT w/ screenshot...', end='')
+            print('creating main QRT w/ screenshot...')
             media_ids = [await self.get_ttweet_image_media_id(ttweet)]
             twt_resp = await self.post_tweet(text, media_ids=media_ids, quote_tweet_id=ttweet.tweet_id)
             print('done')
         except:
             print('error occurred trying to create main tweet, falling back to URL-main + reply screencap format')
             traceback.print_exc()
-            text += f"\n{ttweet_url}"
             try:
-                print('posting main tweet...', end='')
-                twt_resp = await self.post_tweet(text)
+                print('posting main tweet...')
+                twt_resp = await self.post_tweet(text, quote_tweet_id=ttweet.tweet_id)
                 print('done')
                 twt_id = twt_resp.data['id']
-                # if ttweet.reply_to is not None:
-                    # re_ttweet = tt.TalentTweet(tweet_id=ttweet.reply_to, author_id=)
-                    # media_ids.insert(0, await self.get_ttweet_image_media_id())
 
                 try:
                     print('creating reply img...', end='')
@@ -275,18 +148,3 @@ class TwAPI:
                 else:
                     raise e
         return True
-    
-    def post_ttweet_by_id(self, tweet_id, is_catchup=False, dry_run=False):
-        ttweet = asyncio.run(tt.TalentTweet.create_from_id(tweet_id))
-        print(f'm({ttweet.mentions}), r({ttweet.reply_to}), q({ttweet.quote_retweeted})')
-        if ttweet.is_cross_company():
-            print(f'Tweet {ttweet.tweet_id} is cross-company! Creating post...')
-            asyncio.run(self.post_ttweet(ttweet, is_catchup=is_catchup, dry_run=dry_run))
-            ttq.TalentTweetQueue.instance.add_finished_tweet(ttweet.tweet_id)
-        else:
-            print(f'Tweet {tweet_id} is not cross-company.')
-
-
-
-        
-        

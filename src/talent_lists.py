@@ -1,11 +1,12 @@
 import util
 
-holo_en = dict()
-holo_id = dict()
-niji_en = dict()
-niji_exid = dict()
-talents = dict()
-talents_company = dict()
+holo_en: dict[int, str] = dict()
+holo_id: dict[int, str] = dict()
+niji_en: dict[int, str] = dict()
+niji_exid: dict[int, str] = dict()
+talents: dict[int, str] = dict()
+talents_company: dict[int, str] = dict()
+privated_accounts: dict[int, str] = dict()
 
 test_talents = dict()
 
@@ -16,12 +17,15 @@ def __create_dict(file, _dict, company):
     with open(file, 'r') as f:
         for line in f:
             words = line.split()
-            if len(words) == 2 and line[0] != '#':
-                name, id = line.split()
-                name = f'{util.get_username_online(id, default=name)}' # attempt to get updated name
-                talents[int(id)] = name
-                _dict[int(id)] = name
-                talents_company[int(id)] = company
+            if len(words) >= 2 and line[0] != '#':
+                t = line.split()
+                id, name = int(t[0]), t[1]
+                # name = f'{util.get_username_online(id, default=name)}' # attempt to get updated name
+                talents[id] = name
+                _dict[id] = name
+                talents_company[id] = company
+                if len(words) > 2 and words[2] == 'p':
+                    privated_accounts[id] = name
 def init():
     global holo_en
     global holo_id
@@ -36,11 +40,22 @@ def init():
     # nijiEN
     __create_dict(f'{util.get_project_dir()}/lists/nijien.txt', niji_en, 'nijiEN')
     # nijiexID
-    __create_dict(f'{util.get_project_dir()}/lists/nijiexid.txt', niji_exid, 'nijiex-ID')
+    __create_dict(f'{util.get_project_dir()}/lists/nijiexid.txt', niji_exid, 'nijiex\'ID')
     # TODO: nijiex-KR
 
     test_talents = holo_en
 
+def is_niji(id: int) -> bool:
+    return id in niji_en or id in niji_exid
+
+def is_holo(id: int) -> bool:
+    return id in holo_en or id in holo_id
+
+def is_cross_company(id1: int, id2: int):
+    return (is_niji(id1) and is_holo(id2)) or (is_holo(id1) and is_niji(id2))
+
+# For filtered stream
+# DEPRECATED: thx elon
 def get_twitter_rules():
     global talents
     rules = list()

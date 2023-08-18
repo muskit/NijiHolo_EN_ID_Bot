@@ -4,6 +4,7 @@ import os
 import sys
 import traceback
 from datetime import datetime
+from dotenv import dotenv_values
 
 import tweepy
 import pytz
@@ -45,7 +46,7 @@ def get_current_timestamp():
 def get_current_date():
     return datetime.today().strftime('%Y-%m-%d')
 
-def get_key_from_value(d, val):
+def get_key_from_value(d: dict, val):
     keys = [k for k, v in d.items() if v == val]
     if keys:
         return keys[0]
@@ -53,11 +54,12 @@ def get_key_from_value(d, val):
 
 async def create_ttweet_image(ttweet):
     tc = TweetCapture()
+    tc.cookies = [{'name': 'auth_token', 'value': dotenv_values()['web_auth_token']}]
     if 'linux' in sys.platform:
         # Linux chromedriver path
         tc.driver_path = '/usr/bin/chromedriver'
     filename = f'{get_project_dir()}/img.png'
-    url = ttweet_to_url(ttweet)
+    url = ttweet.url()
     img = None
     print(url)
     try: os.remove(filename)
@@ -66,7 +68,7 @@ async def create_ttweet_image(ttweet):
         img = await tc.screenshot(
             url=url,
             path=filename,
-            mode=4,
+            mode=0,
             night_mode=1,
             show_parent_tweets=True
         )
@@ -80,28 +82,20 @@ async def create_ttweet_image(ttweet):
         return img
 
 def get_tweet_url(id, username):
-    return f'https://twitter.com/{username}/status/{id}'
+    return f'https://www.twitter.com/{username}/status/{id}'
 
-def ttweet_to_url(ttweet):
-    username = get_username(ttweet.author_id)
-    return get_tweet_url(ttweet.tweet_id, username)
+## Attempt to pull username from local; pull from online if doesn't exist.
+def get_username(id):
+    ret = talent_lists.talents.get(id, None)
+    if ret == None:
+        return get_username_online(id)
+    return ret
 
-# twint
-# May not work with short user IDs (ie. 1354241437)
-# def get_username_online(id, default=None):
-#     c = twint.Config()
-#     c.User_id = id
-#     c.Store_object = True
-#     c.Hide_output = True
-#     try:
-#         twint.output.users_list.clear()
-#         twint.run.Lookup(c)
-#         user = twint.output.users_list[0]
-#         return user.username
-#     except:
-#         return str(default) if default is not None else f'{id}'
+def get_username_with_company(id):
+    company = talent_lists.talents_company.get(id, None)
+    return f'{get_username(id)} {f"({company})" if company is not None else ""}'
 
-def get_username_local(id):
+def get_username_local(id: int):
     return talent_lists.talents.get(id, f'{id}')
 
 # Retrieve username via API v2 (tweepy)
@@ -115,33 +109,3 @@ def get_username_online(id, default=None):
         print(f'Unhandled error retrieving username for {id}!')
         traceback.print_exc()
         return str(default) if default is not None else f'id:{id}'
-
-## Attempt to pull username from local; pull from online if doesn't exist.
-def get_username(id):
-    ret = talent_lists.talents.get(id, None)
-    if ret == None:
-        return get_username_online(id)
-    return ret
-
-def get_username_with_company(id):
-    company = talent_lists.talents_company.get(id, None)
-    return f'{get_username(id)} {f"({company})" if company is not None else ""}'
-
-def get_user_id_local(username) -> int:
-    talent_usernames = list(talent_lists.talents.values())
-    for i in range(0, len(talent_usernames)):
-        if username.lower() == talent_usernames[i].lower():
-            return list(talent_lists.talents)[i]
-    
-def get_user_id_online(username) -> int:
-    c = twint.Config()
-    c.Username = username
-    c.Store_object = True
-    c.Hide_output = True
-    try:
-        twint.output.users_list.clear()
-        twint.run.Lookup(c)
-        user = twint.output.users_list[0]
-        return user.id
-    except:
-        return -1

@@ -143,5 +143,5 @@ cython_debug/
 .vscode
 
 # project-specific (secret.ini: can't ignore existing file?)
-secrets.ini
 *.png
+*.json
