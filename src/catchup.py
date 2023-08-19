@@ -81,10 +81,15 @@ async def process_queue(priority_tweet_ids: list[str]=None) -> bool:
     try:
         while not queue.is_empty():
             ttweet = queue.get_next_ttweet()
+            if ttweet.tweet_id in queue.finished_ttweets:
+                print('skipping finished tweet...')
+                queue.good(ttweet.tweet_id)
+                continue
+
             tweet_was_successful = await TwAPI.instance.post_ttweet(ttweet)
             
             print('running queue.good()...')
-            queue.good()
+            queue.good(ttweet.tweet_id)
             if tweet_was_successful:
                 ttweets_posted += 1
                 print(f'({ttweets_posted}/{queued_ttweets_count}) done')

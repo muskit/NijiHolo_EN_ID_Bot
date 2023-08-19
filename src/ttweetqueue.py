@@ -22,7 +22,7 @@ class TalentTweetQueue:
         self.__sorted = False
         self.finished_user_dates: dict[int, str] = dict()
         self.ttweets_dict: dict[int, tt.TalentTweet] = dict()
-        self.finished_ttweets: list[int] = list()
+        self.finished_ttweets: set[int] = set()
 
         ## file check, backup copy
         if os.path.exists(self.queue_backup_path):
@@ -74,7 +74,7 @@ class TalentTweetQueue:
         try:
             with open(self.finished_ttweets_path, 'r') as f:
                 for line in f:
-                    self.finished_ttweets.append(int(line))
+                    self.finished_ttweets.add(int(line))
         except: pass
 
 
@@ -102,12 +102,11 @@ class TalentTweetQueue:
     
     ## Call when the TalentTweet retrieved from get_next_ttweet() was
     #  posted successfully.
-    def good(self):
-        with open(self.current_ttweet_path, 'r') as f:
-            ttweet = tt.TalentTweet.deserialize(f.readline())
+    def good(self, tweet_id: int):
+        try: os.remove(self.current_ttweet_path)
+        except: pass
 
-        self.add_finished_tweet(ttweet.tweet_id)
-        os.remove(self.current_ttweet_path)
+        self.add_finished_tweet(tweet_id)
         self.save_file()
         self.is_good = True
     
@@ -129,7 +128,7 @@ class TalentTweetQueue:
         print('done')
 
     def add_finished_tweet(self, id):
-        self.finished_ttweets.append(id)
+        self.finished_ttweets.add(id)
         with open(self.finished_ttweets_path, 'a') as f:
             f.write(f'{id}\n')
     
