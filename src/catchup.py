@@ -63,7 +63,7 @@ async def get_cross_tweets_online():
 
 # return False = errored or we posted at least one ttweet
 # return True = we didn't post a single ttweet
-async def process_queue(priority_tweet_ids: list[str]=None) -> bool:
+async def process_queue() -> bool:
     global errored
     global scraper
     global queue
@@ -137,16 +137,13 @@ async def run(PROGRAM_ARGS):
                 print(f'Invalid tweet {id}!')
                 continue
     
-            if i not in queue.finished_ttweets:
-                posted = await TwAPI.instance.post_ttweet_by_id(i)
-                if posted:
-                    queue.add_finished_tweet(i)
-                    print('Successfully posted tweet. Sleeping for 5 minutes')
-                    await asyncio.sleep(60*5)
-                else:
-                    print('Did not post tweet')
+            posted = await TwAPI.instance.post_ttweet_by_id(i)
+            if posted:
+                queue.add_finished_tweet(i)
+                print('Successfully posted tweet. Sleeping for 5 minutes')
+                await asyncio.sleep(60*5)
             else:
-                print('Tweet was already finished')
+                print('Did not post tweet')
 
         print('Done processing specified tweets')
         PROGRAM_ARGS.post_id = None
@@ -156,7 +153,7 @@ async def run(PROGRAM_ARGS):
             print(f'{queue.get_count()} cross-company tweets to announce.')
             try:
                 if safe_to_post_tweets:
-                    if await process_queue(PROGRAM_ARGS.post_id):
+                    if await process_queue():
                         print('Posted no new tweets; we\'re caught up!')
                         return True
                 else:
