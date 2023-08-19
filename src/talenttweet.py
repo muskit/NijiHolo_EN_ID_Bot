@@ -210,7 +210,7 @@ class TalentTweet:
                 rtm_msg(RETWEET_MENTIONS_B, rt_username)
             else:
                 ret += RETWEET.format(author_username, rt_username)
-            print_mention_ids.clear()
+            mention_usernames.clear()
         elif self.reply_to is not None: # reply
             reply_username = f'@/{util.get_username_with_company(self.reply_to)}' if self.reply_to != -1 else None
             if len(self.rt_mentions) > 0:
@@ -225,11 +225,12 @@ class TalentTweet:
                 ret += QUOTE_TWEET.format(author_username, quoted_username)
         elif len(self.mentions) > 0: # standalone tweet
             ret += TWEET.format(author_username, ", ".join(mention_usernames))
+            mention_usernames.clear()
         else:
             raise ValueError(f'TalentTweet {self.tweet_id} has insufficient other parties')
 
         # mention line
-        if len(print_mention_ids) > 0:
+        if len(mention_usernames) > 0:
             ret += (
                 '\nMentioning '
                 f'{", ".join(mention_usernames)}'
