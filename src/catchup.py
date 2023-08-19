@@ -14,6 +14,8 @@ from twapi import TwAPI
 import talenttweet as tt
 import ttweetqueue as ttq
 
+PROGRAM_ARGS = None
+
 safe_to_post_tweets = True
 errored = False
 
@@ -61,7 +63,7 @@ async def get_cross_tweets_online():
 
 # return False = errored or we posted at least one ttweet
 # return True = we didn't post a single ttweet
-async def process_queue() -> bool:
+async def process_queue(priority_tweet_ids: list[str]=None) -> bool:
     global errored
     global scraper
     global queue
@@ -119,12 +121,37 @@ async def run(PROGRAM_ARGS):
             queue.ttweets_dict[id] = tt.TalentTweet.create_from_tweety(t)
         queue.save_file()
 
+    # post tweets given in command line  first
+    if PROGRAM_ARGS.post_id is not None and len(PROGRAM_ARGS.post_id) > 0:
+        PROGRAM_ARGS.post_id.sort()
+        print('Posting specified tweets first.')
+        for id in PROGRAM_ARGS.post_id:
+            try:
+                i = int(id)
+            except ValueError:
+                print(f'Invalid tweet {id}!')
+                continue
+    
+            if i not in queue.finished_ttweets:
+                posted = await TwAPI.instance.post_ttweet_by_id(i)
+                if posted:
+                    queue.add_finished_tweet(i)
+                    print('Successfully posted tweet. Sleeping for 5 minutes')
+                    await asyncio.sleep(60*5)
+                else:
+                    print('Did not post tweet')
+            else:
+                print('Tweet was already finished')
+
+        print('Done processing specified tweets')
+        PROGRAM_ARGS.post_id = None
+
     async def queue_loop():
         while True:
-            print(f'{queue.get_count()} cross-company tweets to attempt sharing.')
+            print(f'{queue.get_count()} cross-company tweets to announce.')
             try:
                 if safe_to_post_tweets:
-                    if await process_queue():
+                    if await process_queue(PROGRAM_ARGS.post_id):
                         print('Posted no new tweets; we\'re caught up!')
                         return True
                 else:

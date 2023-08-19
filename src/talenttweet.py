@@ -111,6 +111,7 @@ class TalentTweet:
         # filter users to only be talents
         self.mentions = {x for x in mrq[0] if x in tl.talents}
         self.rt_mentions = {x for x in rt_mentions if x in tl.talents}
+        self.mentions.difference_update(self.rt_mentions)
 
         self.reply_to = mrq[1]
         self.quote_tweeted = mrq[2]
@@ -171,7 +172,7 @@ class TalentTweet:
 
     def get_datetime_str(self):
         unpad = '#' if platform.system() == 'Windows' else '-'
-        return self.date_time.strftime(f'%{unpad}I:%M%p (%Z) · %b %{unpad}d, %Y')
+        return self.date_time.strftime(f'%b %{unpad}d, %Y · %{unpad}I:%M%p (%Z)')
 
     def announce_text(self):
         # templates
@@ -207,6 +208,7 @@ class TalentTweet:
                 rtm_msg(RETWEET_MENTIONS_B, rt_username)
             else:
                 ret += RETWEET.format(author_username, rt_username)
+            print_mention_ids.clear()
         elif self.reply_to is not None: # reply
             reply_username = f'@/{util.get_username_with_company(self.reply_to)}' if self.reply_to != -1 else None
             if len(self.rt_mentions) > 0:
@@ -221,8 +223,6 @@ class TalentTweet:
                 ret += QUOTE_TWEET.format(author_username, quoted_username)
         elif len(self.mentions) > 0: # standalone tweet
             ret += TWEET.format(author_username, ", ".join(mention_usernames))
-            f'[{self.get_datetime_str()}]\n'
-            return ret
         else:
             raise ValueError(f'TalentTweet {self.tweet_id} has insufficient other parties')
 
@@ -233,5 +233,6 @@ class TalentTweet:
                 f'{", ".join(mention_usernames)}'
             )
         
+        # date
         ret += f'\n\n{self.get_datetime_str()}'
         return ret

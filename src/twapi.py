@@ -147,3 +147,21 @@ class TwAPI:
                 else:
                     raise e
         return True
+
+    async def post_ttweet_by_id(self, id: int):
+        from scraper import Scraper
+
+        print(f'Manually posting tweet {id}')
+        s = Scraper()
+        t = s.get_tweet(id, True)
+        if not t:
+            print('Tweet could not be retrieved')
+            return False
+        
+        ttweet = tt.TalentTweet.create_from_tweety(t)
+        if not ttweet.is_cross_company():
+            print(f'{ttweet.username}/{ttweet.tweet_id} is not cross-company!')
+            return False
+        
+        print(f'Posting {ttweet.username}/{ttweet.tweet_id}...')
+        return await self.post_ttweet(ttweet)

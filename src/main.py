@@ -24,6 +24,7 @@ def init_argparse():
     p.add_argument('--no-listen', action='store_true', help='Run one scraping-posting cycle without waiting to run again.')
     p.add_argument('--refresh-queue', action='store_true', help='Refresh the details on each tweet currently in queue.')
     p.add_argument('--straight-to-queue', action='store_true', help='Go through queue first before attempting to pull tweets.')
+    p.add_argument('--post-id', action='append', help='ID of a tweet to try and post right away. Specify multiple to post multiple tweets in a row.')
     return p
 
 def command_line():
