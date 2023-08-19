@@ -83,17 +83,19 @@ class TalentTweet:
     @staticmethod
     def create_from_tweety(tweety: Tweet):
         if tweety.is_retweet:
-            rtm = [int(x.id) for x in tweety.retweeted_tweet.user_mentions]
+            rtm = {int(x.id) for x in tweety.retweeted_tweet.user_mentions}
         elif tweety.quoted_tweet:
-            rtm = [int(x.id) for x in tweety.quoted_tweet.user_mentions]
+            rtm = {int(x.id) for x in tweety.quoted_tweet.user_mentions}
+        elif tweety.replied_to:
+            rtm = {int(x.id) for x in tweety.replied_to.user_mentions}
         else:
-            rtm = list()
+            rtm = set()
 
         return TalentTweet(
             tweet_id=int(tweety.id), author_id=int(tweety.author.id),
             date_time=tweety.date, text=tweety.text,
             mrq=(
-                [int(x.id) for x in tweety.user_mentions],
+                {int(x.id) for x in tweety.user_mentions},
                 int(tweety.original_tweet['in_reply_to_user_id_str']) if tweety.is_reply else None,
                 int(tweety.quoted_tweet.author.id) if tweety.quoted_tweet is not None else None
             ),
@@ -145,6 +147,7 @@ class TalentTweet:
             f'parties: {self.get_all_parties_usernames()}\n'
             f'mentions: {self.mentions}\n'
             f'reply_to: {self.reply_to}\n'
+            f'rtm: {self.rt_mentions}\n'
             f'quote_retweeted: {self.quote_tweeted}\n'
             f'cross-company? {self.is_cross_company()}\n'
             f'{self.serialize()}\n'
@@ -232,7 +235,7 @@ class TalentTweet:
         # mention line
         if len(mention_usernames) > 0:
             ret += (
-                '\nMentioning '
+                '\nMentions: '
                 f'{", ".join(mention_usernames)}'
             )
         
