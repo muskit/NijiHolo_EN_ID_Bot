@@ -20,9 +20,9 @@ class TalentTweetQueue:
         self.finished_ttweets_path = f'{util.get_project_dir()}/finished_ttweets.txt'
         self.is_good = True
         self.__sorted = False
-        self.finished_user_dates = dict()
-        self.ttweets_dict = dict()
-        self.finished_ttweets = list()
+        self.finished_user_dates: dict[int, str] = dict()
+        self.ttweets_dict: dict[int, tt.TalentTweet] = dict()
+        self.finished_ttweets: list[int] = list()
 
         ## file check, backup copy
         if os.path.exists(self.queue_backup_path):
@@ -62,6 +62,14 @@ class TalentTweetQueue:
         except:
             traceback.print_exc()
             pass
+        # unfinished ttweet
+        if os.path.exists(self.current_ttweet_path):
+            with open(self.current_ttweet_path, 'r') as f:
+                for line in f:
+                    if len(line) > 0:
+                        ttweet = tt.TalentTweet.deserialize(line)
+                        if ttweet.tweet_id in self.ttweets_dict:
+                            self.ttweets_dict[ttweet.tweet_id] = ttweet
         # finished ttweets
         try:
             with open(self.finished_ttweets_path, 'r') as f:
@@ -82,13 +90,6 @@ class TalentTweetQueue:
 
     def get_next_ttweet(self):
         self.is_good = False
-        if os.path.exists(self.current_ttweet_path):
-            with open(self.current_ttweet_path, 'r') as f:
-                ttweet = tt.TalentTweet.deserialize(f.readline())
-                if ttweet.tweet_id in self.ttweets_dict:
-                    self.ttweets_dict.pop(ttweet.tweet_id)
-                return ttweet
-
         self.__sort_ttweets_dict()
         key = list(self.ttweets_dict.keys())[0]
         ttweet = self.ttweets_dict.pop(key)
@@ -112,7 +113,7 @@ class TalentTweetQueue:
     
     # overwrite queue.txt
     def save_file(self):
-        print('saving file...', end='')
+        print('saving queue files...', end='')
         shutil.copyfile(self.queue_path, self.queue_backup_path)
         self.__sort_ttweets_dict()
         with open(self.queue_path, 'w') as f:

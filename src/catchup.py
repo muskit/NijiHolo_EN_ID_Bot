@@ -5,10 +5,7 @@
 # We should post, at the fastest, one tweet per minute.
 
 import traceback
-import datetime
 import asyncio
-import shutil
-from datetime import datetime
 
 from scraper import Scraper
 from util import *
@@ -20,19 +17,20 @@ import ttweetqueue as ttq
 safe_to_post_tweets = True
 errored = False
 
+scraper: Scraper
+
 # Returns a list of sorted and filtered TalentTweets (should
 # be equivalent to queue.txt)
 async def get_cross_tweets_online():
     global safe_to_post_tweets
-
-    scraper = Scraper()
-    queue = ttq.TalentTweetQueue.instance
+    global queue
+    global scraper
 
     # Begin getting tweets from online
     print('Pulling tweets from online!')
     try:
-        for i, (talent_id, talent_username) in enumerate(talent_lists.talents.items()):
-            print(f'[{i+1}/{len(talent_lists.talents)}] {talent_username}-----------------------------------')
+        for i, (talent_id, talent_username) in enumerate(talents.items()):
+            print(f'[{i+1}/{len(talents)}] {talent_username}-----------------------------------')
             try:
                 since_date = queue.finished_user_dates.get(talent_id, None)
                 ttweets = scraper.get_cross_ttweets_from_user(talent_username, since_date=since_date)
@@ -48,7 +46,7 @@ async def get_cross_tweets_online():
                 safe_to_post_tweets = False
                 traceback.print_exc()
             else:
-                queue.finished_user_dates[talent_id] = util.get_current_date()
+                queue.finished_user_dates[talent_id] = get_current_date()
                 queue.save_file()
     except KeyboardInterrupt:
         print('Interrupting tweet pulling... NOTE: remaining dates in queue file will not be updated!')
@@ -65,13 +63,14 @@ async def get_cross_tweets_online():
 # return True = we didn't post a single ttweet
 async def process_queue() -> bool:
     global errored
+    global scraper
+    global queue
+
+    errored = False
+    queued_ttweets_count = queue.get_count()
     
     WAIT_TIME = 60*15
     ttweets_posted = 0
-    errored = False
-
-    queue = ttq.TalentTweetQueue.instance
-    queued_ttweets_count = queue.get_count()
 
     if queued_ttweets_count == 0:
         print('Posting queue is empty!')
@@ -106,8 +105,19 @@ async def process_queue() -> bool:
 async def run(PROGRAM_ARGS):
     global errored
     global safe_to_post_tweets
+    global scraper
+    global queue
 
+    scraper = Scraper()
     queue = ttq.TalentTweetQueue.instance
+
+    if PROGRAM_ARGS.refresh_queue:
+        PROGRAM_ARGS.refresh_queue = False
+        print('Refreshing queue tweets...')
+        for id in queue.ttweets_dict:
+            t  = scraper.get_tweet(id, queue.ttweets_dict[id].author_id in privated_accounts)
+            queue.ttweets_dict[id] = tt.TalentTweet.create_from_tweety(t)
+        queue.save_file()
 
     async def queue_loop():
         while True:
@@ -134,6 +144,7 @@ async def run(PROGRAM_ARGS):
             await get_cross_tweets_online()
 
     if PROGRAM_ARGS.straight_to_queue:
+        PROGRAM_ARGS.straight_to_queue = False
         print('Processing queue first before pulling tweets...')
         return await queue_loop()
     else:

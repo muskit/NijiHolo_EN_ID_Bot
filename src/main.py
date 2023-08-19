@@ -22,6 +22,7 @@ def init_argparse():
     p = argparse.ArgumentParser(description='Twitter bot that follows interactions between Nijisanji EN/ID and hololive EN/ID members.', formatter_class=RawTextHelpFormatter)
     p.add_argument('mode', nargs='?', help=MODES_HELP_STR)
     p.add_argument('--no-listen', action='store_true', help='Run one scraping-posting cycle without waiting to run again.')
+    p.add_argument('--refresh-queue', action='store_true', help='Refresh the details on each tweet currently in queue.')
     p.add_argument('--straight-to-queue', action='store_true', help='Go through queue first before attempting to pull tweets.')
     return p
 
@@ -46,6 +47,16 @@ async def async_main():
     else:
         print('\nunknown mode. run with no arguments or -h for help and modes')
 
+def init_data():
+    # Initialize shared API instance
+    TwAPI()
+
+    # Initialize talent account lists
+    talent_lists.init()
+
+    # Initialize queue files system
+    ttq.TalentTweetQueue()
+
 def main():
     global PROGRAM_ARGS
 
@@ -56,14 +67,7 @@ def main():
 
     PROGRAM_ARGS = parser.parse_args()
 
-    # Initialize shared API instance
-    TwAPI()
-
-    # Initialize talent account lists
-    talent_lists.init()
-
-    # Initialize queue files system
-    ttq.TalentTweetQueue()
+    init_data()
 
     ## Asynchronous execution
     nest_asyncio.apply()

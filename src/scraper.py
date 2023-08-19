@@ -40,6 +40,65 @@ class Scraper:
 			return True
 		print('exhausted all accounts!')
 		return False
+	
+	def login_wait(self, private=False):
+		if private:
+			print(f"keeping pvt-accessible account ({self.__account.use_index(0)[0]}). sleeping for 2 minutes...")
+			sleep(120)
+			print()
+			l = self.try_login(0)
+		else:
+			l = self.try_login()
+		if not l:
+			print("sleeping for 2 minutes...")
+			sleep(120)
+			print()
+			self.try_login()
+	
+	# recover lost info
+	def fix_tweet(self, tweet: Tweet):
+		if tweet.is_retweet:
+			if tweet.retweeted_tweet is None:
+				print(f'{tweet.author.username}/{tweet.id} is missing the RT! It\'s probably nothing...')
+				# tweet.retweeted_tweet = self.app.tweet_detail(str(tweet.id)).retweeted_tweet
+				tweet.is_retweet = False
+			elif tweet.retweeted_tweet.author is None:
+				print(f'WARNING: {tweet.author.username}/{tweet.id} is missing the RT author! Recovering details...')
+				tweet.retweeted_tweet = self.get_tweet(tweet.retweeted_tweet.id)
+
+		if tweet.is_quoted:
+			if tweet.quoted_tweet is None: # quoted tweet is deleted
+				# print(f'{tweet.author.username}/{tweet.id} is missing the QRT! Recovering...')
+				# tweet.quoted_tweet = self.app.tweet_detail(str(tweet.id)).quoted_tweet
+				tweet.is_quoted = False
+			elif tweet.quoted_tweet.author is None:
+				print(f'WARNING: {tweet.author.username}/{tweet.id} is missing the QRT author! Recovering details...')
+				tweet.quoted_tweet = self.get_tweet(tweet.quoted_tweet.id)
+
+		if tweet.is_reply and tweet.replied_to is None:
+			print('missing reply-to tweet. recovering...')
+			tweet.replied_to = self.get_tweet(tweet.original_tweet['in_reply_to_status_id_str'])
+		return tweet
+	
+	def get_tweet(self, id: int, private_user=False):
+		print(f'{id}{" on private" if private_user else ""}')
+		if private_user:
+			self.try_login(0)
+		while True:
+			try:
+				t = self.app.tweet_detail(str(id))
+				return self.fix_tweet(t) if t is not None else None
+			except UnknownError:
+				print("UnknownError occurred, probably rate-limited")
+				self.login_wait(private_user)
+			except Exception as e:
+				if private_user:
+					print("Unknown exception occurred, tweet is probably unavailable")
+					print(e.with_traceback())
+					return None
+				else:
+					print("Unknown exception occurred, trying again as private...")
+					self.get_tweet(id, True)
 
 	# since MUST BE TIMEZONE AWARE
 	# usage example: since=datetime(2023, 8, 1).replace(tzinfo=pytz.utc)
@@ -66,28 +125,8 @@ class Scraper:
 				print(f"skipping malformed tweet: {tweet}")
 				return
 
-			# recover lost info
-			if tweet.is_retweet:
-				if tweet.retweeted_tweet is None:
-					print(f'{tweet.author.username}/{tweet.id} is missing the RT! It\'s probably nothing...')
-					# tweet.retweeted_tweet = self.app.tweet_detail(str(tweet.id)).retweeted_tweet
-					tweet.is_retweet = False
-				elif tweet.retweeted_tweet.author is None:
-					print(f'WARNING: {tweet.author.username}/{tweet.id} is missing the RT author! Recovering details...')
-					tweet.retweeted_tweet = self.app.tweet_detail(tweet.retweeted_tweet.id)
-
-			if tweet.is_quoted:
-				if tweet.quoted_tweet is None: # quoted tweet is deleted
-					# print(f'{tweet.author.username}/{tweet.id} is missing the QRT! Recovering...')
-					# tweet.quoted_tweet = self.app.tweet_detail(str(tweet.id)).quoted_tweet
-					tweet.is_quoted = False
-				elif tweet.quoted_tweet.author is None:
-					print(f'WARNING: {tweet.author.username}/{tweet.id} is missing the QRT author! Recovering details...')
-					tweet.quoted_tweet = self.app.tweet_detail(tweet.quoted_tweet.id)
-
-			# fix reply if it exists
-			# if tweet.is_reply and tweet.replied_to is None:
-			# 	tweet.replied_to = self.app.tweet_detail(tweet.original_tweet['in_reply_to_status_id_str'])
+			tweet = self.fix_tweet(self, tweet)
+			
 			tweets.append(tweet)
 
 			if not reached_backdate and int(tweet.author.id) == uid and tweet.date <= since:
@@ -118,18 +157,7 @@ class Scraper:
 				cur = search.cursor
 			except UnknownError:
 				print("UnknownError occurred, probably rate-limited")
-				if uid in talent_lists.privated_accounts:
-					print("sticking pvt-accessible account. sleeping for 2 minutes...")
-					sleep(120)
-					print()
-					l = self.try_login(0)
-				else:
-					l = self.try_login()
-				if not l:
-					print("sleeping for 2 minutes...")
-					sleep(120)
-					print()
-					self.try_login()
+				self.login_wait(uid in talent_lists.privated_accounts)
 		
 		tweets.sort(key=lambda t: t.id)
 		return tweets

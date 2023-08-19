@@ -1,5 +1,4 @@
 from datetime import datetime
-from zoneinfo import ZoneInfo
 import platform
 
 import pytz
@@ -85,7 +84,7 @@ class TalentTweet:
     def create_from_tweety(tweety: Tweet):
         if tweety.is_retweet:
             rtm = [int(x.id) for x in tweety.retweeted_tweet.user_mentions]
-        elif tweety.is_quoted:
+        elif tweety.quoted_tweet:
             rtm = [int(x.id) for x in tweety.quoted_tweet.user_mentions]
         else:
             rtm = list()
@@ -132,6 +131,9 @@ class TalentTweet:
         except: pass
         try: self.all_parties.remove(self.author_id)
         except: pass
+
+        if not self.is_cross_company():
+            print(f'WARNING: {self.tweet_id} is not cross-company!')
     
 
     def __repr__(self) -> str:
@@ -169,7 +171,7 @@ class TalentTweet:
 
     def get_datetime_str(self):
         unpad = '#' if platform.system() == 'Windows' else '-'
-        return self.date_time.strftime(f'%b %{unpad}d %Y, %{unpad}I:%M%p (%Z)')
+        return self.date_time.strftime(f'%{unpad}I:%M%p (%Z) · %b %{unpad}d, %Y')
 
     def announce_text(self):
         # templates

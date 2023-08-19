@@ -7,7 +7,6 @@ import tweepy
 
 import talenttweet as tt
 import talent_lists as tl
-import ttweetqueue as ttq
 import util
 
 class TwAPI:

@@ -1,4 +1,4 @@
-import util
+from util import get_project_dir
 
 holo_en: dict[int, str] = dict()
 holo_id: dict[int, str] = dict()
@@ -34,13 +34,13 @@ def init():
     global test_talents
 
     # holoEN
-    __create_dict(f'{util.get_project_dir()}/lists/holoen.txt', holo_en, 'holoEN')
+    __create_dict(f'{get_project_dir()}/lists/holoen.txt', holo_en, 'holoEN')
     # holoID
-    __create_dict(f'{util.get_project_dir()}/lists/holoid.txt', holo_id, 'holoID')
+    __create_dict(f'{get_project_dir()}/lists/holoid.txt', holo_id, 'holoID')
     # nijiEN
-    __create_dict(f'{util.get_project_dir()}/lists/nijien.txt', niji_en, 'nijiEN')
+    __create_dict(f'{get_project_dir()}/lists/nijien.txt', niji_en, 'nijiEN')
     # nijiexID
-    __create_dict(f'{util.get_project_dir()}/lists/nijiexid.txt', niji_exid, 'nijiex\'ID')
+    __create_dict(f'{get_project_dir()}/lists/nijiexid.txt', niji_exid, 'nijiex\'ID')
     # TODO: nijiex-KR
 
     test_talents = holo_en

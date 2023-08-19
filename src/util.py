@@ -6,11 +6,9 @@ import traceback
 from datetime import datetime
 from dotenv import dotenv_values
 
-import tweepy
 import pytz
-import twint
-import twapi
 from tweetcapture import TweetCapture
+import tweepy
 
 from recrop import fix_aspect_ratio
 import talent_lists
@@ -52,6 +50,7 @@ def get_key_from_value(d: dict, val):
         return keys[0]
     return None
 
+# FIXME: web_auth_token under rate-limitation will fail to screenshot
 async def create_ttweet_image(ttweet):
     tc = TweetCapture()
     tc.cookies = [{'name': 'auth_token', 'value': dotenv_values()['web_auth_token']}]
@@ -100,6 +99,7 @@ def get_username_local(id: int):
 
 # Retrieve username via API v2 (tweepy)
 def get_username_online(id, default=None):
+    import twapi
     try:
         resp = twapi.TwAPI.instance.client.get_user(id=id)
         return resp.data.username
