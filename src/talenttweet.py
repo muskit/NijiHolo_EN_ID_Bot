@@ -55,7 +55,7 @@ class TalentTweet:
 
         mode = ''
         for i in range(3, len(tokens)):
-            if len(tokens[i]) == 1 and not tokens[i].isnumeric(): # mode switch
+            if not tokens[i].isnumeric(): # mode switch
                 mode = tokens[i]
                 continue
         
@@ -72,6 +72,8 @@ class TalentTweet:
                     rt = int(tokens[i])
                 if mode == 'rtm': # retweet/qrt mentions
                     rtm.append(int(tokens[i]))
+                else:
+                    raise ValueError(f'encountered invalid mode token {mode}')
         
         return TalentTweet(
             tweet_id=tweet_id, author_id=author_id,
@@ -161,9 +163,13 @@ class TalentTweet:
         return util.get_tweet_url(self.tweet_id, self.username)
 
     def is_cross_company(self):
+        if self.author_id == self.rt_author_id:
+            return False
+        
         for other_id in self.all_parties:
             if tl.is_cross_company(self.author_id, other_id):
                 return True
+            
         return False
     
     def get_all_parties_usernames(self):
