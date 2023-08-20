@@ -30,7 +30,10 @@ def init_argparse():
 def command_line():
     # TODO (extra): implement command line mode for manually controlling the bot
     print('Here\'s a Python interpretor.')
-    code.interact(local=globals())
+    try:
+        code.interact(local=globals())
+    except SystemExit:
+        pass
 
 async def async_main():
     global PROGRAM_ARGS
