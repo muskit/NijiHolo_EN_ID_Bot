@@ -93,7 +93,7 @@ class TwAPI:
             tweet = self.client.create_tweet(text=text, media_ids=media_ids, in_reply_to_tweet_id=reply_to_tweet, quote_tweet_id=quote_tweet_id)
             return tweet
         except tweepy.TooManyRequests as e:
-            wait_for = float(e.response.headers["x-rate-limit-reset"]) - datetime.datetime.now().timestamp() + 1
+            wait_for = abs(float(e.response.headers["x-rate-limit-reset"]) - datetime.datetime.now().timestamp()) + 1
             print(f'\thit rate limit -- attempting to create Tweet again in {wait_for} seconds...')
             await asyncio.sleep(wait_for)
             return await self.post_tweet(text=text, media_ids=media_ids, reply_to_tweet=reply_to_tweet)
