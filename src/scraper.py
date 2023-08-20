@@ -125,7 +125,7 @@ class Scraper:
 				print(f"skipping malformed tweet: {tweet}")
 				return
 
-			tweet = self.fix_tweet(self, tweet)
+			tweet = self.fix_tweet(tweet)
 			
 			tweets.append(tweet)
 
