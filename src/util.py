@@ -53,19 +53,19 @@ def get_key_from_value(d: dict, val):
 # FIXME: web_auth_token under rate-limitation will fail to screenshot
 async def create_ttweet_image(ttweet):
     tc = TweetCapture()
-    tc.cookies = [{'name': 'auth_token', 'value': dotenv_values()['web_auth_token']}]
+    auth_token = dotenv_values().get('web_auth_token')
+    if auth_token:
+        tc.cookies = [{'name': 'auth_token', 'value': auth_token}]
     if 'linux' in sys.platform:
         # Linux chromedriver path
         tc.driver_path = '/usr/bin/chromedriver'
     filename = f'{get_project_dir()}/img.png'
-    url = ttweet.url()
     img = None
-    print(url)
     try: os.remove(filename)
     except: pass
     try:
         img = await tc.screenshot(
-            url=url,
+            url=ttweet.url(),
             path=filename,
             mode=4,
             night_mode=1,
@@ -76,9 +76,9 @@ async def create_ttweet_image(ttweet):
         print('unable to create tweet image')
         traceback.print_exc()
         return None
-    else:
-        print(f'successfully saved {img}')
-        return img
+    
+    print(f'successfully saved {img}')
+    return img
 
 def get_tweet_url(id, username):
     return f'https://www.twitter.com/{username}/status/{id}'
