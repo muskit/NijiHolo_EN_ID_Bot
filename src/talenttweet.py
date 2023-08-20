@@ -114,6 +114,8 @@ class TalentTweet:
         self.mentions = {x for x in mrq[0] if x in tl.talents}
         self.rt_mentions = {x for x in rt_mentions if x in tl.talents}
         self.mentions.difference_update(self.rt_mentions)
+        try: self.rt_mentions.remove(self.author_id)
+        except: pass
 
         self.reply_to = mrq[1]
         self.quote_tweeted = mrq[2]
@@ -181,7 +183,7 @@ class TalentTweet:
         # templates
         TWEET = '{0} tweeted mentioning {1}!'
         REPLY = '{0} replied to {1}!'
-        REPLY_TO_MENTION_B = '{0} replied to a tweet{1}mentioning {1}!' #########################
+        REPLY_TO_MENTION_B = '{0} replied to a tweet{1}mentioning {2}!' #########################
         RETWEET = '{0} retweeted {1}!'
         RETWEET_MENTIONS_B = '{0} shared a tweet{1}mentioning {2}!' #########################
         QUOTE_TWEET = '{0} quote tweeted {1}!'
