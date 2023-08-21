@@ -100,7 +100,7 @@ class Scraper:
 					return None
 				else:
 					print("Unknown exception occurred, trying again as private...")
-					self.get_tweet(id, True)
+					return self.get_tweet(id, True)
 
 	# since MUST BE TIMEZONE AWARE
 	# usage example: since=datetime(2023, 8, 1).replace(tzinfo=pytz.utc)

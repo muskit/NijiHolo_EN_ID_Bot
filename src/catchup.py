@@ -21,8 +21,7 @@ errored = False
 
 scraper: Scraper
 
-# Returns a list of sorted and filtered TalentTweets (should
-# be equivalent to queue.txt)
+# Updates TTweetQueue
 async def get_cross_tweets_online():
     global safe_to_post_tweets
     global queue
@@ -50,9 +49,10 @@ async def get_cross_tweets_online():
             else:
                 queue.finished_user_dates[talent_id] = get_current_date()
                 queue.save_file()
-    except KeyboardInterrupt:
+    except KeyboardInterrupt as e:
         print('Interrupting tweet pulling... NOTE: remaining dates in queue file will not be updated!')
         queue.save_file()
+        raise e
     except:
         print('Unhandled error occurred while pulling tweets.')
         traceback.print_exc()
@@ -159,9 +159,9 @@ async def run(PROGRAM_ARGS):
                 else:
                     print('Tweets were not retrieved cleanly. Not processing queue.')
                     return False
-            except KeyboardInterrupt:
+            except KeyboardInterrupt as e:
                 print('Interrupting queue processing...')
-                return False
+                raise e
             except:
                 print('Unhandled error occurred while running catch up in posting phase.')
                 traceback.print_exc()
@@ -172,10 +172,14 @@ async def run(PROGRAM_ARGS):
             
             await get_cross_tweets_online()
 
-    if PROGRAM_ARGS.straight_to_queue:
-        PROGRAM_ARGS.straight_to_queue = False
-        print('Processing queue first before pulling tweets...')
-        return await queue_loop()
-    else:
-        await get_cross_tweets_online()
-        return await queue_loop()
+    try:
+        if PROGRAM_ARGS.straight_to_queue:
+            PROGRAM_ARGS.straight_to_queue = False
+            print('Processing queue first before pulling tweets...')
+            return await queue_loop()
+        else:
+            await get_cross_tweets_online()
+            return await queue_loop()
+    except KeyboardInterrupt:
+        print('Interrupt received. Ending catchup mode...')
+        return False
