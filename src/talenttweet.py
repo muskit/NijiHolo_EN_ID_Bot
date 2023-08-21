@@ -63,14 +63,14 @@ class TalentTweet:
                 if mode == 'm': # mentions
                     mentions.append(int(tokens[i]))
                     continue
-                if mode == 'r': # reply_to
+                elif mode == 'r': # reply_to
                     reply_to = int(tokens[i])
                     continue
-                if mode == 'q': # quote_retweeted
+                elif mode == 'q': # quote_retweeted
                     quote_retweeted = int(tokens[i])
-                if mode == 'rt': # retweeted user
+                elif mode == 'rt': # retweeted user
                     rt = int(tokens[i])
-                if mode == 'rtm': # retweet/qrt mentions
+                elif mode == 'rtm': # retweet/qrt mentions
                     rtm.append(int(tokens[i]))
                 else:
                     raise ValueError(f'encountered invalid mode token {mode}')
