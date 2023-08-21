@@ -21,11 +21,13 @@ class Scraper:
 		self.try_login()
 	
 	def try_login(self, account_idx: int = None) -> bool:
+		# decide on which account to use
 		if account_idx is not None:
 			acc = self.__account.use_index(account_idx)
 		else:
 			acc = self.__account.next()
 
+		# attempt to login with the account
 		if acc is not None:
 			name = acc[0]
 			print(f"using {name}")
