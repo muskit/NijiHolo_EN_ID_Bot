@@ -96,7 +96,7 @@ class Scraper:
 			except Exception as e:
 				if private_user:
 					print("Unknown exception occurred, tweet is probably unavailable")
-					print(e.with_traceback())
+					print(e)
 					return None
 				else:
 					print("Unknown exception occurred, trying again as private...")

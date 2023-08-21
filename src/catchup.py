@@ -157,7 +157,7 @@ async def run(PROGRAM_ARGS):
                         print('Posted no new tweets; we\'re caught up!')
                         return True
                 else:
-                    print('Tweets were not retrieved cleanly.')
+                    print('Tweets were not retrieved cleanly. Not processing queue.')
                     return False
             except KeyboardInterrupt:
                 print('Interrupting queue processing...')
