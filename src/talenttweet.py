@@ -139,8 +139,8 @@ class TalentTweet:
         try: self.all_parties.remove(self.author_id)
         except: pass
 
-        if not self.is_cross_company():
-            print(f'WARNING: {self.tweet_id} is not cross-company!')
+        # if not self.is_cross_company():
+        #     print(f'WARNING: {self.tweet_id} is not cross-company!')
     
 
     def __repr__(self) -> str:

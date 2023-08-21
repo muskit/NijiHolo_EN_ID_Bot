@@ -177,6 +177,7 @@ class Scraper:
 			tt = TalentTweet.create_from_tweety(t)
 			if tt.is_cross_company():
 				ret.append(tt)
+		print(f'Found {len(ret)}/{len(tweets)} TalentTweets')
 		return ret
 
 if __name__== '__main__':
