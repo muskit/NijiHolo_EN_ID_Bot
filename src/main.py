@@ -65,9 +65,9 @@ def main():
     global PROGRAM_ARGS
 
     parser = init_argparse()
-    if len(sys.argv) < 2:
-        parser.print_help()
-        return
+    # if len(sys.argv) < 2:
+    #     parser.print_help()
+    #     return
 
     PROGRAM_ARGS = parser.parse_args()
 
