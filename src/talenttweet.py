@@ -206,7 +206,8 @@ class TalentTweet:
         def rtm_msg(TEMPLATE: str, rtm_author_username: str):
             nonlocal ret
             if (self.rt_author_id is not None and self.rt_author_id != -1) \
-                or (self.quote_tweeted is not None and self.quote_tweeted != -1): # rtm tweet is from talent; rtm should be everyone
+                or (self.quote_tweeted is not None and self.quote_tweeted != -1) \
+                or (self.reply_to is not None and self.reply_to != -1): # rtm tweet is from talent; rtm should be everyone
                 rtm_names = [f'@/{util.get_username_with_company(x)}' for x in self.rt_mentions]
                 between = f' from {rtm_author_username} '
                 ret += TEMPLATE.format(author_username, between, ", ".join(rtm_names))
