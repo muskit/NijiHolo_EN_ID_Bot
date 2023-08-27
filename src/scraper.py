@@ -61,24 +61,22 @@ class Scraper:
 	def fix_tweet(self, tweet: Tweet):
 		if tweet.is_retweet:
 			if tweet.retweeted_tweet is None:
-				print(f'{tweet.author.username}/{tweet.id} is missing the RT! It\'s probably nothing...')
 				# tweet.retweeted_tweet = self.app.tweet_detail(str(tweet.id)).retweeted_tweet
+				# print(f'{tweet.author.username}/{tweet.id} is missing the RT! It\'s probably nothing...')
 				tweet.is_retweet = False
 			elif tweet.retweeted_tweet.author is None:
-				print(f'{tweet.author.username}/{tweet.id} is missing the RT author! Fetching RT\'d...')
+				# print(f'{tweet.author.username}/{tweet.id} is missing the RT author! Fetching RT\'d...')
 				tweet.retweeted_tweet = self.get_tweet(tweet.retweeted_tweet.id)
 
 		if tweet.is_quoted:
 			if tweet.quoted_tweet is None: # quoted tweet is deleted
-				# print(f'{tweet.author.username}/{tweet.id} is missing the QRT! Recovering...')
-				# tweet.quoted_tweet = self.app.tweet_detail(str(tweet.id)).quoted_tweet
 				tweet.is_quoted = False
 			elif tweet.quoted_tweet.author is None:
-				print(f'{tweet.author.username}/{tweet.id} is missing the QRT author! Fetching QRT\'d...')
+				# print(f'{tweet.author.username}/{tweet.id} is missing the QRT author! Fetching QRT\'d...')
 				tweet.quoted_tweet = self.get_tweet(tweet.quoted_tweet.id)
 
 		if tweet.is_reply and tweet.replied_to is None:
-			print(f'{tweet.author.username}/{tweet.id} is missing reply-to tweet! Recovering...')
+			# print(f'{tweet.author.username}/{tweet.id} is missing reply-to tweet! Recovering...')
 			tweet.replied_to = self.get_tweet(tweet.original_tweet['in_reply_to_status_id_str'])
 		return tweet
 	
@@ -98,13 +96,13 @@ class Scraper:
 				#traceback.print_exc()
 				self.login_wait(private_user)
 			except Exception as e:
-				if private_user:
-					print("Unknown exception occurred, tweet is probably unavailable")
+				if not private_user:
+					print("Unhandled exception occurred, trying again as private...")
+					return self.get_tweet(id, True)
+				else:
+					print("Unhandled exception occurred, tweet is probably unavailable")
 					print(e)
 					return None
-				else:
-					print("Unknown exception occurred, trying again as private...")
-					return self.get_tweet(id, True)
 
 	# since MUST BE TIMEZONE AWARE
 	# usage example: since=datetime(2023, 8, 1).replace(tzinfo=pytz.utc)
