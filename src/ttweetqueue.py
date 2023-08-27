@@ -112,9 +112,12 @@ class TalentTweetQueue:
         self.is_good = True
     
     # overwrite queue.txt
-    def save_file(self):
-        print('saving queue files...', end='')
-        shutil.copyfile(self.queue_path, self.queue_backup_path)
+    def save_file(self, replace_backup=True):
+        print('saving queue...', end='')
+        if replace_backup:
+            print('overwriting backup...', end='')
+            shutil.copyfile(self.queue_path, self.queue_backup_path)
+
         self.__sort_ttweets_dict()
         with open(self.queue_path, 'w') as f:
             # write dates
