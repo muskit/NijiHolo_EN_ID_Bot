@@ -17,8 +17,6 @@ import ttweetqueue as ttq
 PROGRAM_ARGS = None
 
 safe_to_post_tweets = True
-errored = False
-
 scraper: Scraper
 
 # Updates TTweetQueue
@@ -42,10 +40,10 @@ async def get_cross_tweets_online():
                         queue.add_ttweet(ttweet)
             except KeyboardInterrupt as e:
                 raise e
-            except:
-                print('Error occurred processing tweet data.')
+            except Exception as e:
+                print('Unhandled error occurred processing tweet data.')
                 safe_to_post_tweets = False
-                traceback.print_exc()
+                raise e
             else:
                 queue.finished_user_dates[talent_id] = get_current_date()
                 queue.save_file()
@@ -56,19 +54,22 @@ async def get_cross_tweets_online():
     except:
         print('Unhandled error occurred while pulling tweets.')
         traceback.print_exc()
+        with open("error_catchup.txt", "a") as f:
+            traceback.print_exc(file=f)
         safe_to_post_tweets = False
     else:
         print('Successfully saved all tweets from online!')
         queue.save_file()
 
-# return False = errored or we posted at least one ttweet
+# return False = we posted at least one ttweet
 # return True = we didn't post a single ttweet
 async def process_queue() -> bool:
-    global errored
+    '''
+    Go through the queue and post stored TalentTweets.
+    '''
     global scraper
     global queue
 
-    errored = False
     queued_ttweets_count = queue.get_count()
     
     WAIT_TIME = 60*15
@@ -98,19 +99,17 @@ async def process_queue() -> bool:
                     await asyncio.sleep(WAIT_TIME-5)
                     print('5 second warning!')
                     await asyncio.sleep(5)
-    except:
+    except Exception as e:
         print('Unhandled error occurred while posting tweets from queue.')
-        errored = True
         traceback.print_exc()
 
-    if errored or ttweets_posted > 0:
+    if ttweets_posted > 0:
         return False
     return True
 
 # return True = no problems
 # return False = issue occurred where we couldn't post all past tweets properly
 async def run(PROGRAM_ARGS):
-    global errored
     global safe_to_post_tweets
     global scraper
     global queue
@@ -118,15 +117,7 @@ async def run(PROGRAM_ARGS):
     scraper = Scraper()
     queue = ttq.TalentTweetQueue.instance
 
-    if PROGRAM_ARGS.refresh_queue:
-        PROGRAM_ARGS.refresh_queue = False
-        print('Refreshing queue tweets...')
-        for id in queue.ttweets_dict:
-            t  = scraper.get_tweet(id, queue.ttweets_dict[id].author_id in privated_accounts)
-            queue.ttweets_dict[id] = tt.TalentTweet.create_from_tweety(t)
-        queue.save_file()
-
-    # post tweets given in command line  first
+    # post tweets given in command line first
     if PROGRAM_ARGS.post_id is not None and len(PROGRAM_ARGS.post_id) > 0:
         PROGRAM_ARGS.post_id.sort()
         print('Posting specified tweets first.')
@@ -144,9 +135,17 @@ async def run(PROGRAM_ARGS):
                 await asyncio.sleep(60*5)
             else:
                 print('Did not post tweet')
-
         print('Done processing specified tweets')
         PROGRAM_ARGS.post_id = None
+
+    # refresh stored queue first
+    if PROGRAM_ARGS.refresh_queue:
+        PROGRAM_ARGS.refresh_queue = False
+        print('Refreshing queue tweets...')
+        for id in queue.ttweets_dict:
+            t  = scraper.get_tweet(id, queue.ttweets_dict[id].author_id in privated_accounts)
+            queue.ttweets_dict[id] = tt.TalentTweet.create_from_tweety(t)
+        queue.save_file()
 
     async def queue_loop():
         while True:
@@ -154,32 +153,29 @@ async def run(PROGRAM_ARGS):
             try:
                 if safe_to_post_tweets:
                     if await process_queue():
+                        print("Finished processing queue")
+                    else:
                         print('Posted no new tweets; we\'re caught up!')
-                        return True
+                        return
                 else:
                     print('Tweets were not retrieved cleanly. Not processing queue.')
-                    return False
+                    return
             except KeyboardInterrupt as e:
                 print('Interrupting queue processing...')
                 raise e
             except:
                 print('Unhandled error occurred while running catch up in posting phase.')
                 traceback.print_exc()
-                return False
-            
-            if errored:
-                return False
-            
             await get_cross_tweets_online()
 
     try:
         if PROGRAM_ARGS.straight_to_queue:
             PROGRAM_ARGS.straight_to_queue = False
-            print('Processing queue first before pulling tweets...')
-            return await queue_loop()
+            print('Processing queue first before fetching tweets...')
+            await queue_loop()
         else:
             await get_cross_tweets_online()
-            return await queue_loop()
+            await queue_loop()
     except KeyboardInterrupt:
         print('Interrupt received. Ending catchup mode...')
         return False

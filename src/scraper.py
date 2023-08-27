@@ -65,7 +65,7 @@ class Scraper:
 				# tweet.retweeted_tweet = self.app.tweet_detail(str(tweet.id)).retweeted_tweet
 				tweet.is_retweet = False
 			elif tweet.retweeted_tweet.author is None:
-				print(f'WARNING: {tweet.author.username}/{tweet.id} is missing the RT author! Recovering details...')
+				print(f'{tweet.author.username}/{tweet.id} is missing the RT author! Fetching RT\'d...')
 				tweet.retweeted_tweet = self.get_tweet(tweet.retweeted_tweet.id)
 
 		if tweet.is_quoted:
@@ -74,11 +74,11 @@ class Scraper:
 				# tweet.quoted_tweet = self.app.tweet_detail(str(tweet.id)).quoted_tweet
 				tweet.is_quoted = False
 			elif tweet.quoted_tweet.author is None:
-				print(f'WARNING: {tweet.author.username}/{tweet.id} is missing the QRT author! Recovering details...')
+				print(f'{tweet.author.username}/{tweet.id} is missing the QRT author! Fetching QRT\'d...')
 				tweet.quoted_tweet = self.get_tweet(tweet.quoted_tweet.id)
 
 		if tweet.is_reply and tweet.replied_to is None:
-			print('missing reply-to tweet. recovering...')
+			print(f'{tweet.author.username}/{tweet.id} is missing reply-to tweet! Recovering...')
 			tweet.replied_to = self.get_tweet(tweet.original_tweet['in_reply_to_status_id_str'])
 		return tweet
 	
@@ -90,8 +90,12 @@ class Scraper:
 			try:
 				t = self.app.tweet_detail(str(id))
 				return self.fix_tweet(t) if t is not None else None
+			except RateLimitReached:
+				print("RateLimitReached occurred")
+				self.login_wait(private_user)
 			except UnknownError:
 				print("UnknownError occurred, probably rate-limited")
+				#traceback.print_exc()
 				self.login_wait(private_user)
 			except Exception as e:
 				if private_user:
@@ -157,7 +161,7 @@ class Scraper:
 							add_tweet(t)
 				
 				cur = search.cursor
-			except UnknownError:
+			except (UnknownError, RateLimitReached):
 				print("UnknownError occurred, probably rate-limited")
 				self.login_wait(uid in talent_lists.privated_accounts)
 		
