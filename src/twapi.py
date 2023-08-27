@@ -94,9 +94,9 @@ class TwAPI:
             return tweet
         except tweepy.TooManyRequests as e:
             wait_for = abs(float(e.response.headers["x-rate-limit-reset"]) - datetime.datetime.now().timestamp()) + 1
-            print(f'\thit rate limit -- attempting to create Tweet again in {wait_for} seconds...')
+            print(f'\thit rate limit: trying again in {wait_for}s...')
             await asyncio.sleep(wait_for)
-            return await self.post_tweet(text=text, media_ids=media_ids, reply_to_tweet=reply_to_tweet)
+            return await self.post_tweet(text=text, media_ids=media_ids, reply_to_tweet=reply_to_tweet, quote_tweet_id=quote_tweet_id)
 
     async def get_ttweet_image_media_id(self, ttweet):
         img = await util.create_ttweet_image(ttweet)
