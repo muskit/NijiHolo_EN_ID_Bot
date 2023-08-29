@@ -154,6 +154,7 @@ async def run(PROGRAM_ARGS):
                 if safe_to_post_tweets:
                     if await process_queue():
                         print("Finished processing queue")
+                        return
                     else:
                         print('Posted no new tweets; we\'re caught up!')
                         return
