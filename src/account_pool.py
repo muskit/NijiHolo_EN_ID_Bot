@@ -4,7 +4,7 @@ from dotenv import dotenv_values
 class AccountPool:
     def __init__(self):
         self.__accounts: list[tuple[str, str]] = list()
-        self.__idx = -1
+        self.__idx = 0
         creds = dotenv_values()
         i = 0
         while True:

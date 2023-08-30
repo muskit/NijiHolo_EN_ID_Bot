@@ -45,15 +45,15 @@ class Scraper:
 	
 	def login_wait(self, private=False):
 		if private:
-			print(f"keeping pvt-accessible account ({self.__account.use_index(0)[0]}). sleeping for 2 minutes...")
-			sleep(120)
+			print(f"keeping pvt-accessible account ({self.__account.use_index(0)[0]}). sleeping for 4 minutes...")
+			sleep(240)
 			print()
 			l = self.try_login(0)
 		else:
 			l = self.try_login()
 		if not l:
-			print("sleeping for 2 minutes...")
-			sleep(120)
+			print("sleeping for 4 minutes...")
+			sleep(240)
 			print()
 			self.try_login()
 	
@@ -81,7 +81,7 @@ class Scraper:
 		return tweet
 	
 	def get_tweet(self, id: int, private_user=False):
-		print(f'{id}{" on private" if private_user else ""}')
+		# print(f'{id}{" on private" if private_user else ""}')
 		if private_user:
 			self.try_login(0)
 		while True:

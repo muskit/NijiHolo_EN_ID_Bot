@@ -25,11 +25,14 @@ async def get_cross_tweets_online():
     global queue
     global scraper
 
+    safe_to_post_tweets = True
+    dbg_curr_user = ''
     # Begin getting tweets from online
     print('Pulling tweets from online!')
     try:
         for i, (talent_id, talent_username) in enumerate(talents.items()):
             print(f'[{i+1}/{len(talents)}] {talent_username}-----------------------------------')
+            dbg_curr_user = f'{talent_id}: {talent_username}'
             try:
                 since_date = queue.finished_user_dates.get(talent_id, None)
                 ttweets = scraper.get_cross_ttweets_from_user(talent_username, since_date=since_date)
@@ -55,6 +58,7 @@ async def get_cross_tweets_online():
         print('Unhandled error occurred while pulling tweets.')
         traceback.print_exc()
         with open("error_catchup.txt", "a") as f:
+            f.write(f'Error getting tweets from user {dbg_curr_user}\n')
             traceback.print_exc(file=f)
         safe_to_post_tweets = False
     else:
