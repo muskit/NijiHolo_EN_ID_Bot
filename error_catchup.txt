@@ -1,0 +1,248 @@
+Error getting tweets from user 1283657064410017793: gawrgura
+Traceback (most recent call last):
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/src/catchup.py", line 49, in get_cross_tweets_online
+    raise e
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/src/catchup.py", line 37, in get_cross_tweets_online
+    since_date = queue.finished_user_dates.get(talent_id, None)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'finished_user_dates'
+Error getting tweets from user 1536577295632441344: axelsyrios
+Traceback (most recent call last):
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/src/catchup.py", line 49, in get_cross_tweets_online
+    raise e
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/src/catchup.py", line 38, in get_cross_tweets_online
+    ttweets = scraper.get_cross_ttweets_from_user(talent_username, since_date=since_date)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/src/scraper.py", line 175, in get_cross_ttweets_from_user
+    tweets = self.get_tweets_from_user(username, since)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/src/scraper.py", line 146, in get_tweets_from_user
+    search = self.app.search(f'from:{username}', filter_=SearchFilters.Latest(), cursor=cur)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/.venv/lib/python3.11/site-packages/tweety/bot.py", line 182, in search
+    results = list(search.generator())
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/.venv/lib/python3.11/site-packages/tweety/types/base.py", line 23, in generator
+    results = self.get_next_page()
+              ^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/.venv/lib/python3.11/site-packages/tweety/types/search.py", line 29, in get_next_page
+    thisTweets = self._parse_response(response)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/.venv/lib/python3.11/site-packages/tweety/types/search.py", line 78, in _parse_response
+    tweets = self._get_tweet_content_key(entry)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/.venv/lib/python3.11/site-packages/tweety/types/search.py", line 53, in _get_tweet_content_key
+    return [response['content']['itemContent']['tweet_results']['result']]
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+KeyError: 'result'
+Error getting tweets from user 1536577295632441344: axelsyrios
+Traceback (most recent call last):
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/src/catchup.py", line 49, in get_cross_tweets_online
+    raise e
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/src/catchup.py", line 38, in get_cross_tweets_online
+    ttweets = scraper.get_cross_ttweets_from_user(talent_username, since_date=since_date)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/src/scraper.py", line 175, in get_cross_ttweets_from_user
+    tweets = self.get_tweets_from_user(username, since)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/src/scraper.py", line 146, in get_tweets_from_user
+    search = self.app.search(f'from:{username}', filter_=SearchFilters.Latest(), cursor=cur)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/.venv/lib/python3.11/site-packages/tweety/bot.py", line 182, in search
+    results = list(search.generator())
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/.venv/lib/python3.11/site-packages/tweety/types/base.py", line 23, in generator
+    results = self.get_next_page()
+              ^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/.venv/lib/python3.11/site-packages/tweety/types/search.py", line 29, in get_next_page
+    thisTweets = self._parse_response(response)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/.venv/lib/python3.11/site-packages/tweety/types/search.py", line 65, in _parse_response
+    entries = self._get_entries(response)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/.venv/lib/python3.11/site-packages/tweety/types/search.py", line 40, in _get_entries
+    instructions = response['data']['search_by_raw_query']['search_timeline']['timeline']['instructions']
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+KeyError: 'timeline'
+Error getting tweets from user 1589531775058968576: D_Dropscythe
+Traceback (most recent call last):
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/src/catchup.py", line 49, in get_cross_tweets_online
+    raise e
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/src/catchup.py", line 38, in get_cross_tweets_online
+    ttweets = scraper.get_cross_ttweets_from_user(talent_username, since_date=since_date)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/src/scraper.py", line 175, in get_cross_ttweets_from_user
+    tweets = self.get_tweets_from_user(username, since)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/src/scraper.py", line 146, in get_tweets_from_user
+    search = self.app.search(f'from:{username}', filter_=SearchFilters.Latest(), cursor=cur)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/.venv/lib/python3.11/site-packages/tweety/bot.py", line 182, in search
+    results = list(search.generator())
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/.venv/lib/python3.11/site-packages/tweety/types/base.py", line 23, in generator
+    results = self.get_next_page()
+              ^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/.venv/lib/python3.11/site-packages/tweety/types/search.py", line 29, in get_next_page
+    thisTweets = self._parse_response(response)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/.venv/lib/python3.11/site-packages/tweety/types/search.py", line 78, in _parse_response
+    tweets = self._get_tweet_content_key(entry)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/.venv/lib/python3.11/site-packages/tweety/types/search.py", line 53, in _get_tweet_content_key
+    return [response['content']['itemContent']['tweet_results']['result']]
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+KeyError: 'result'
+Error getting tweets from user 1205743596785127424: RiksaDhirendra
+Traceback (most recent call last):
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/src/catchup.py", line 49, in get_cross_tweets_online
+    raise e
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/src/catchup.py", line 38, in get_cross_tweets_online
+    ttweets = scraper.get_cross_ttweets_from_user(talent_username, since_date=since_date)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/src/scraper.py", line 175, in get_cross_ttweets_from_user
+    tweets = self.get_tweets_from_user(username, since)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/src/scraper.py", line 146, in get_tweets_from_user
+    search = self.app.search(f'from:{username}', filter_=SearchFilters.Latest(), cursor=cur)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/.venv/lib/python3.11/site-packages/tweety/bot.py", line 182, in search
+    results = list(search.generator())
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/.venv/lib/python3.11/site-packages/tweety/types/base.py", line 23, in generator
+    results = self.get_next_page()
+              ^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/.venv/lib/python3.11/site-packages/tweety/types/search.py", line 29, in get_next_page
+    thisTweets = self._parse_response(response)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/.venv/lib/python3.11/site-packages/tweety/types/search.py", line 78, in _parse_response
+    tweets = self._get_tweet_content_key(entry)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/.venv/lib/python3.11/site-packages/tweety/types/search.py", line 53, in _get_tweet_content_key
+    return [response['content']['itemContent']['tweet_results']['result']]
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+KeyError: 'result'
+Error getting tweets from user 1465858739970273281: luca_kaneshiro
+Traceback (most recent call last):
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/src/catchup.py", line 49, in get_cross_tweets_online
+    raise e
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/src/catchup.py", line 38, in get_cross_tweets_online
+    ttweets = scraper.get_cross_ttweets_from_user(talent_username, since_date=since_date)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/src/scraper.py", line 175, in get_cross_ttweets_from_user
+    tweets = self.get_tweets_from_user(username, since)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/src/scraper.py", line 146, in get_tweets_from_user
+    search = self.app.search(f'from:{username}', filter_=SearchFilters.Latest(), cursor=cur)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/.venv/lib/python3.11/site-packages/tweety/bot.py", line 182, in search
+    results = list(search.generator())
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/.venv/lib/python3.11/site-packages/tweety/types/base.py", line 23, in generator
+    results = self.get_next_page()
+              ^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/.venv/lib/python3.11/site-packages/tweety/types/search.py", line 29, in get_next_page
+    thisTweets = self._parse_response(response)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/.venv/lib/python3.11/site-packages/tweety/types/search.py", line 65, in _parse_response
+    entries = self._get_entries(response)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/.venv/lib/python3.11/site-packages/tweety/types/search.py", line 40, in _get_entries
+    instructions = response['data']['search_by_raw_query']['search_timeline']['timeline']['instructions']
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+KeyError: 'timeline'
+Error getting tweets from user 1545354510515654656: ScarleYonaguni
+Traceback (most recent call last):
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/src/catchup.py", line 49, in get_cross_tweets_online
+    raise e
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/src/catchup.py", line 38, in get_cross_tweets_online
+    ttweets = scraper.get_cross_ttweets_from_user(talent_username, since_date=since_date)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/src/scraper.py", line 175, in get_cross_ttweets_from_user
+    tweets = self.get_tweets_from_user(username, since)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/src/scraper.py", line 120, in get_tweets_from_user
+    uid = self.app._get_user_id(username)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/.venv/lib/python3.11/site-packages/tweety/bot.py", line 68, in _get_user_id
+    user_id = self.get_user_info(username).id
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/.venv/lib/python3.11/site-packages/tweety/bot.py", line 47, in get_user_info
+    user_raw = self.request.get_user(username)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/.venv/lib/python3.11/site-packages/tweety/http.py", line 88, in get_user
+    response = self.__get_response__(**self.__builder.user_by_screen_name(username))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/.venv/lib/python3.11/site-packages/tweety/http.py", line 47, in __get_response__
+    return GenericError(
+           ^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/.venv/lib/python3.11/site-packages/tweety/types/n_types.py", line 60, in __init__
+    self._raise_exception()
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/.venv/lib/python3.11/site-packages/tweety/types/n_types.py", line 71, in _raise_exception
+    raise UnknownError(
+tweety.exceptions_.UnknownError: [0] Internal server error
+Error getting tweets from user 1323147856828510208: RezaAvanluna
+Traceback (most recent call last):
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/src/catchup.py", line 49, in get_cross_tweets_online
+    raise e
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/src/catchup.py", line 38, in get_cross_tweets_online
+    ttweets = scraper.get_cross_ttweets_from_user(talent_username, since_date=since_date)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/src/scraper.py", line 175, in get_cross_ttweets_from_user
+    tweets = self.get_tweets_from_user(username, since)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/src/scraper.py", line 120, in get_tweets_from_user
+    uid = self.app._get_user_id(username)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/.venv/lib/python3.11/site-packages/tweety/bot.py", line 68, in _get_user_id
+    user_id = self.get_user_info(username).id
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/.venv/lib/python3.11/site-packages/tweety/bot.py", line 49, in get_user_info
+    return User(user_raw['data']['user']['result'])
+                ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+KeyError: 'result'
+Error getting tweets from user 1465851243167895554: Mysta_Rias
+Traceback (most recent call last):
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/src/catchup.py", line 49, in get_cross_tweets_online
+    raise e
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/src/catchup.py", line 38, in get_cross_tweets_online
+    ttweets = scraper.get_cross_ttweets_from_user(talent_username, since_date=since_date)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/src/scraper.py", line 175, in get_cross_ttweets_from_user
+    tweets = self.get_tweets_from_user(username, since)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/src/scraper.py", line 154, in get_tweets_from_user
+    add_tweet(e)
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/src/scraper.py", line 136, in add_tweet
+    if not reached_backdate and int(tweet.author.id) == uid and tweet.date <= since:
+                                                                ^^^^^^^^^^^^^^^^^^^
+TypeError: '<=' not supported between instances of 'NoneType' and 'datetime.datetime'
+Error getting tweets from user 1668490052199120896: Tyrant_Vanta
+Traceback (most recent call last):
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/src/catchup.py", line 49, in get_cross_tweets_online
+    raise e
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/src/catchup.py", line 38, in get_cross_tweets_online
+    ttweets = scraper.get_cross_ttweets_from_user(talent_username, since_date=since_date)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/src/scraper.py", line 175, in get_cross_ttweets_from_user
+    tweets = self.get_tweets_from_user(username, since)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/src/scraper.py", line 146, in get_tweets_from_user
+    search = self.app.search(f'from:{username}', filter_=SearchFilters.Latest(), cursor=cur)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/.venv/lib/python3.11/site-packages/tweety/bot.py", line 182, in search
+    results = list(search.generator())
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/.venv/lib/python3.11/site-packages/tweety/types/base.py", line 23, in generator
+    results = self.get_next_page()
+              ^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/.venv/lib/python3.11/site-packages/tweety/types/search.py", line 29, in get_next_page
+    thisTweets = self._parse_response(response)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/.venv/lib/python3.11/site-packages/tweety/types/search.py", line 78, in _parse_response
+    tweets = self._get_tweet_content_key(entry)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tran/git/NijiHolo_EN_ID_Bot/.venv/lib/python3.11/site-packages/tweety/types/search.py", line 53, in _get_tweet_content_key
+    return [response['content']['itemContent']['tweet_results']['result']]
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+KeyError: 'result'

@@ -58,8 +58,13 @@ def init_data():
     # Initialize talent account lists
     talent_lists.init()
 
-    # Initialize queue files system
-    ttq.TalentTweetQueue()
+    if PROGRAM_ARGS.mode:
+        mode = PROGRAM_ARGS.mode.lower()
+        if mode != 'cmd':
+            # Initialize queue files system
+            ttq.TalentTweetQueue()
+    else:
+        ttq.TalentTweetQueue()
 
 def main():
     global PROGRAM_ARGS

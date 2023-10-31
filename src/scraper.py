@@ -100,7 +100,7 @@ class Scraper:
 					print("Unhandled exception occurred, trying again as private...")
 					return self.get_tweet(id, True)
 				else:
-					print("Unhandled exception occurred, tweet is probably unavailable")
+					print(f"Unhandled exception occurred, tweet {id} is probably unavailable")
 					print(e)
 					return None
 
