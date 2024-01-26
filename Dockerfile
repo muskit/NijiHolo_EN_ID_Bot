@@ -1,8 +1,7 @@
-FROM ubuntu:latest
+FROM alpine:latest
 
 # Install dependencies
-RUN apt update && apt upgrade -y
-RUN apt install -y python3 python3-pip chromium-browser chromium-chromedriver git
+RUN apk update && apk add --no-cache python3 py3-pip chromium chromium-chromedriver git
 
 # Set working directory
 WORKDIR /app
