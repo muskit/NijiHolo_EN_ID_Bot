@@ -143,9 +143,5 @@ cython_debug/
 .vscode
 
 # project-specific
-*.png
+run/
 *.json
-queue.txt
-_queue_backup.txt
-finished_ttweets.txt
-_current_ttweet.txt
