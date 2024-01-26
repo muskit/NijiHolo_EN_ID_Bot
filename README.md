@@ -53,7 +53,7 @@ This is the authentication token obtained from a browser when signed in on the T
 ```
 web_auth_token=
 ```
-### Example contents of `.env` without values
+### Example `.env` without values
 ```
 scraper_username0=
 scraper_password0=
