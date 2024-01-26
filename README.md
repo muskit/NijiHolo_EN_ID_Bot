@@ -24,7 +24,7 @@ The bot may run in these modes:
 * Command-line (`cmd`): an interactive mode for manual control and debugging (drops into Python interpretor)
 
 ## `.env`
-These need to be defined in a `.env` file at the project root (outside of `src`):
+These need to be defined in a `.env` file in the `run` ephemeral directory.
 
 ### Scraper Credentials
 To get around rate limitations imposed on users, we scrape with multiple accounts. Each account is defined in the file using the following format:

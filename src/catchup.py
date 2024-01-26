@@ -41,13 +41,12 @@ async def get_cross_tweets_online():
                 ttweets = scraper.get_cross_ttweets_from_user(
                     talent_username, since_date=since_date
                 )
-                print(f"got {len(ttweets)} TalentTweets")
+                added_to_queue = 0
                 for ttweet in ttweets:
-                    if (
-                        ttweet.tweet_id not in queue.finished_ttweets
-                        and ttweet.is_cross_company()
-                    ):
+                    if ttweet.tweet_id not in queue.finished_ttweets:
+                        added_to_queue += 1
                         queue.add_ttweet(ttweet)
+                print(f"Enqueued {added_to_queue}/{len(ttweets)} tweets.")
             except KeyboardInterrupt as e:
                 raise e
             except Exception as e:
