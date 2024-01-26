@@ -56,6 +56,7 @@ async def get_cross_tweets_online():
             else:
                 queue.finished_user_dates[talent_id] = get_current_date()
                 queue.save_file()
+                print(f"That's {queue.get_count()} so far")
     except KeyboardInterrupt as e:
         print(
             "Interrupting tweet pulling... NOTE: remaining dates in queue file will not be updated!"
