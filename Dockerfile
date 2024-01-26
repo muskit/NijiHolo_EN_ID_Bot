@@ -1,7 +1,7 @@
-FROM alpine:latest
+FROM ubuntu:latest
 
 # Install dependencies
-RUN apk update && apk add --no-cache python3 py3-pip chromium chromium-chromedriver git
+RUN apt update && apt install -y python3 python3-pip chromium-browser chromium-chromedriver git
 
 # Set working directory
 WORKDIR /app
@@ -10,11 +10,11 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip3 install -r requirements.txt
 
-# Mount working directory
-VOLUME ./run
-
 # Copy source code
 COPY . .
+
+# Mount working directory
+VOLUME ./run
 
 # Run the bot
 CMD ["python3", "src/main.py"]
