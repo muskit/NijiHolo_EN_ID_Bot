@@ -119,7 +119,7 @@ def get_username(id):
 
 def get_username_with_company(id):
     company = talent_lists.talents_company.get(id, None)
-    return f'{get_username(id)} {f"({company})" if company is not None else ""}'
+    return f'@/{get_username(id)} {f"({company})" if company is not None else ""}'
 
 
 def get_username_local(id: int):
