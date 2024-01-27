@@ -144,4 +144,4 @@ cython_debug/
 
 # project-specific
 run/
-*.json
+*.tw_session
