@@ -61,6 +61,10 @@ def get_current_date():
     return datetime.today().strftime("%Y-%m-%d")
 
 
+def get_current_datetime_pretty():
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S %Z")
+
+
 def get_key_from_value(d: dict, val):
     keys = [k for k, v in d.items() if v == val]
     if keys:
