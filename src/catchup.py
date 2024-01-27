@@ -67,6 +67,7 @@ async def get_cross_tweets_online():
         print("Unhandled error occurred while pulling tweets.")
         traceback.print_exc()
         with open(working_path(file="error_catchup.txt"), "a") as f:
+            f.write(f"-------[{get_current_datetime_pretty()}]-------\n")
             f.write(f"Error getting tweets from user {dbg_curr_user}\n")
             traceback.print_exc(file=f)
         safe_to_post_tweets = False

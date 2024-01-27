@@ -241,7 +241,7 @@ class TalentTweet:
             "{0} quoted a tweet{1}mentioning {2}!"  #########################
         )
 
-        author_username = f"@/{util.get_username_with_company(self.author_id)}"
+        author_username = util.get_username_with_company(self.author_id)
         ret = str()
 
         print_mention_ids = set(self.mentions)
@@ -250,7 +250,7 @@ class TalentTweet:
         except:
             pass
         mention_usernames = [
-            f"@/{util.get_username_with_company(x)}" for x in print_mention_ids
+            util.get_username_with_company(x) for x in print_mention_ids
         ]
 
         def rtm_msg(TEMPLATE: str, rtm_author_username: str):
@@ -261,13 +261,13 @@ class TalentTweet:
                 or (self.reply_to is not None and self.reply_to != -1)
             ):  # rtm tweet is from talent; rtm should be everyone
                 rtm_names = [
-                    f"@/{util.get_username_with_company(x)}" for x in self.rt_mentions
+                    util.get_username_with_company(x) for x in self.rt_mentions
                 ]
                 between = f" from {rtm_author_username} "
                 ret += TEMPLATE.format(author_username, between, ", ".join(rtm_names))
             else:  # rtm tweet is not from a talent; rtm should just be cross company
                 rtm_names = [
-                    f"@/{util.get_username_with_company(x)}"
+                    util.get_username_with_company(x)
                     for x in self.rt_mentions
                     if tl.is_cross_company(self.author_id, x)
                 ]
@@ -276,10 +276,12 @@ class TalentTweet:
         # Tweet types
         if self.rt_author_id is not None:  # retweet
             rt_username = (
-                f"@/{util.get_username_with_company(self.rt_author_id)}"
+                util.get_username_with_company(self.rt_author_id)
                 if self.rt_author_id != -1
                 else None
             )
+            if rt_username == author_username:
+                rt_username = "themselves"
             if len(self.rt_mentions) > 0:
                 rtm_msg(RETWEET_MENTIONS_B, rt_username)
             else:
@@ -287,20 +289,24 @@ class TalentTweet:
             mention_usernames.clear()
         elif self.reply_to is not None:  # reply
             reply_username = (
-                f"@/{util.get_username_with_company(self.reply_to)}"
+                util.get_username_with_company(self.reply_to)
                 if self.reply_to != -1
                 else None
             )
+            if reply_username == author_username:
+                reply_username = "themselves"
             if len(self.rt_mentions) > 0:
                 rtm_msg(REPLY_TO_MENTION_B, reply_username)
             else:
                 ret += REPLY.format(author_username, reply_username)
         elif self.quote_tweeted is not None:  # qrt
             quoted_username = (
-                f"@/{util.get_username_with_company(self.quote_tweeted)}"
+                util.get_username_with_company(self.quote_tweeted)
                 if self.quote_tweeted != -1
                 else None
             )
+            if quoted_username == author_username:
+                quoted_username = "themselves"
             if len(self.rt_mentions) > 0:
                 rtm_msg(QUOTED_TWEET_MENTIONS_B, quoted_username)
             else:

@@ -61,6 +61,10 @@ def get_current_date():
     return datetime.today().strftime("%Y-%m-%d")
 
 
+def get_current_datetime_pretty():
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S %Z")
+
+
 def get_key_from_value(d: dict, val):
     keys = [k for k, v in d.items() if v == val]
     if keys:
@@ -115,7 +119,7 @@ def get_username(id):
 
 def get_username_with_company(id):
     company = talent_lists.talents_company.get(id, None)
-    return f'{get_username(id)} {f"({company})" if company is not None else ""}'
+    return f'@/{get_username(id)} {f"({company})" if company is not None else ""}'
 
 
 def get_username_local(id: int):
