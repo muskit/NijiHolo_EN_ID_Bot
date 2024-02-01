@@ -8,6 +8,7 @@ WORKDIR /app
 
 # Install pip dependencies
 COPY requirements.txt .
+python3 -m venv .venv && source .venv/bin/activate
 RUN pip3 install -r requirements.txt
 
 # Copy source code
