@@ -6,13 +6,20 @@ Twitter bot that tracks cross-company interactions between the non-JP branches o
 **This project was created to run [this account](https://twitter.com/NijiHolo_EN_ID).**
 
 ## Running
-Install dependencies.
-```
-pip install -r requirements.txt
-```
-Setup the `.env` in the project root. Refer to the `.env` section for variables.
+With the way packages are setup, **you must have Docker installed and running!!**
 
-Run the program from project root (not in `src`). Refer to the following section for options.
+Setup the `.env` in the project root. Refer to the [`.env`](#env) section for variables.
+
+Build and run the Docker container:
+```bash
+# to run attached (can CTRL+P,CTRL+Q to detach)
+sh run.sh
+
+# ... or to run headless
+sh run_detached.sh
+```
+
+If attached to a container prepared by Dockerfile, you can run the program from project root (not in `src`). Refer to the following section for options.
 ```
 python src/main.py
 ```
