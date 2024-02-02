@@ -4,4 +4,3 @@ pytz
 git+https://github.com/muskit/tweety.git
 tweepy
 tweet-capture
-opencv-python-headless
