@@ -145,3 +145,4 @@ cython_debug/
 # project-specific
 run/
 *.tw_session
+.venv*
