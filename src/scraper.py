@@ -19,7 +19,7 @@ class Scraper:
     def __init__(self):
         Scraper.instance = self
         self.__account = AccountPool()
-        self.try_login()
+        self.try_login(0)
 
     def try_login(self, account_idx: int = None) -> bool:
         # decide on which account to use
@@ -159,7 +159,7 @@ class Scraper:
                 search = self.app.search(
                     f"from:{username}", filter_=SearchFilters.Latest(), cursor=cur
                 )
-                cur_page = search.tweets
+                cur_page = search.results
                 print(f"obtained {len(cur_page)} tweets")
 
                 if len(cur_page) == 0:
