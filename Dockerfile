@@ -1,7 +1,7 @@
 FROM alpine:latest
 
 # Install dependencies
-RUN apk update && apk add git build-base linux-headers python3 python3-dev py3-pip py3-opencv chromium chromium-chromedriver
+RUN apk update && apk add font-noto-cjk git build-base linux-headers python3 python3-dev py3-pip py3-opencv chromium chromium-chromedriver
 
 # Set working directory
 WORKDIR /app
