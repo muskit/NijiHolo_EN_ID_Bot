@@ -11,9 +11,9 @@ def run(PROGRAM_ARGS):
     while True:
         try:
             asyncio.run(catchup.run(PROGRAM_ARGS))
-            print('Sleeping for 60 minutes...')
-            sleep(60*60) # run every hour
+            print("Sleeping for 60 minutes...")
+            sleep(60 * 30)  # run every half-hour
         except KeyboardInterrupt:
-            print('Interrupt signal received. Exiting listen mode.')
-            print(f'errors encountered throughout session.')
+            print("Interrupt signal received. Exiting listen mode.")
+            print(f"errors encountered throughout session.")
             break

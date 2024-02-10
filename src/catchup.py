@@ -59,7 +59,7 @@ async def get_cross_tweets_online():
                 print(f"Queue has {queue.get_count()} tweets so far")
     except KeyboardInterrupt as e:
         print(
-            "Interrupting tweet pulling... NOTE: remaining dates in queue file will not be updated!"
+            "Interrupting tweet pulling. The remaining dates in queue file will not be updated!"
         )
         queue.save_file()
         raise e
