@@ -41,6 +41,11 @@ def init_argparse():
         help="Go through queue first before attempting to pull tweets.",
     )
     p.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Don't actually post anything to Twitter; use to check outputs from console.",
+    )
+    p.add_argument(
         "--post-id",
         action="append",
         help="ID of a tweet to try and post right away. Specify multiple to post multiple tweets in a row.",

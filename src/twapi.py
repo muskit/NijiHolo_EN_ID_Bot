@@ -136,6 +136,8 @@ class TwAPI:
     # return True = successfully posted a single ttweet
     # return False = did not post ttweet (duplicate)
     async def post_ttweet(self, ttweet: tt.TalentTweet, dry_run=False):
+        import main
+
         print(
             f"------{ttweet.tweet_id} ({util.get_username_local(ttweet.author_id)})------"
         )
@@ -145,11 +147,9 @@ class TwAPI:
 
         if dry_run:
             print("-------------------- DRY RUN --------------------")
-        print(ttweet)
-        if dry_run:
+            print(ttweet)
             return False
 
-        # NO DRY-RUN: actually post tweet
         # main tweet: text + screenshot
         try:
             print("creating main QRT w/ screenshot...")
@@ -188,7 +188,7 @@ class TwAPI:
                     raise e
         return True
 
-    async def post_ttweet_by_id(self, id: int):
+    async def post_ttweet_by_id(self, id: int, dry_run=False):
         from scraper import Scraper
 
         print(f"Manually posting tweet {id}")
@@ -204,4 +204,4 @@ class TwAPI:
             return False
 
         print(f"Posting {ttweet.username}/{ttweet.tweet_id}...")
-        return await self.post_ttweet(ttweet)
+        return await self.post_ttweet(ttweet, dry_run)

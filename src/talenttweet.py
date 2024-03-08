@@ -278,7 +278,7 @@ class TalentTweet:
             rt_username = (
                 util.get_username_with_company(self.rt_author_id)
                 if self.rt_author_id != -1
-                else None
+                else "someone"
             )
             if rt_username == author_username:
                 rt_username = "themselves"
@@ -291,7 +291,7 @@ class TalentTweet:
             reply_username = (
                 util.get_username_with_company(self.reply_to)
                 if self.reply_to != -1
-                else None
+                else "someone"
             )
             if reply_username == author_username:
                 reply_username = "themselves"
@@ -303,7 +303,7 @@ class TalentTweet:
             quoted_username = (
                 util.get_username_with_company(self.quote_tweeted)
                 if self.quote_tweeted != -1
-                else None
+                else "someone"
             )
             if quoted_username == author_username:
                 quoted_username = "themselves"

@@ -144,7 +144,7 @@ async def run(PROGRAM_ARGS):
                 print(f"Invalid tweet {id}!")
                 continue
 
-            posted = await TwAPI.instance.post_ttweet_by_id(i)
+            posted = await TwAPI.instance.post_ttweet_by_id(i, PROGRAM_ARGS.dry_run)
             if posted:
                 queue.add_finished_tweet(i)
                 print("Successfully posted tweet. Sleeping for 5 minutes")
