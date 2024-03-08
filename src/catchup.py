@@ -59,7 +59,7 @@ async def get_cross_tweets_online():
                 print(f"Queue has {queue.get_count()} tweets so far")
     except KeyboardInterrupt as e:
         print(
-            "Interrupting tweet pulling... NOTE: remaining dates in queue file will not be updated!"
+            "Interrupting tweet pulling. The remaining dates in queue file will not be updated!"
         )
         queue.save_file()
         raise e
@@ -144,7 +144,7 @@ async def run(PROGRAM_ARGS):
                 print(f"Invalid tweet {id}!")
                 continue
 
-            posted = await TwAPI.instance.post_ttweet_by_id(i)
+            posted = await TwAPI.instance.post_ttweet_by_id(i, PROGRAM_ARGS.dry_run)
             if posted:
                 queue.add_finished_tweet(i)
                 print("Successfully posted tweet. Sleeping for 5 minutes")

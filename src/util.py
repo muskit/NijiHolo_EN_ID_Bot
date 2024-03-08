@@ -26,7 +26,7 @@ def project_root(dir_path: tuple[str] = tuple(), file: str = None):
 
 
 def working_path(dir_path: tuple[str] = tuple(), file: str = None):
-    """Returns file path relative to the working ephemeral directory."""
+    """Returns file path relative to the working ephemeral directory "run"."""
     dir_path = project_root(("run", *dir_path))
     Path(dir_path).mkdir(parents=True, exist_ok=True)
 

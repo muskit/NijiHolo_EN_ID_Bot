@@ -19,7 +19,7 @@ class Scraper:
     def __init__(self):
         Scraper.instance = self
         self.__account = AccountPool()
-        self.try_login()
+        self.try_login(0)
 
     def try_login(self, account_idx: int = None) -> bool:
         # decide on which account to use
@@ -81,7 +81,7 @@ class Scraper:
         if tweet.is_reply and tweet.replied_to is None:
             # print(f'{tweet.author.username}/{tweet.id} is missing reply-to tweet! Recovering...')
             tweet.replied_to = self.get_tweet(
-                tweet.original_tweet["in_reply_to_status_id_str"]
+                tweet._original_tweet["in_reply_to_status_id_str"]
             )
         return tweet
 
@@ -159,7 +159,7 @@ class Scraper:
                 search = self.app.search(
                     f"from:{username}", filter_=SearchFilters.Latest(), cursor=cur
                 )
-                cur_page = search.tweets
+                cur_page = search.results
                 print(f"obtained {len(cur_page)} tweets")
 
                 if len(cur_page) == 0:
@@ -168,7 +168,7 @@ class Scraper:
                 for e in cur_page:
                     if isinstance(e, Tweet):
                         add_tweet(e)
-                    elif isinstance(e, TweetThread):
+                    elif isinstance(e, SelfThread):
                         # FIXME: rework when replied_to is fixed (currently populates user_mentions)
                         # latest tweet in thread = og author's reply
                         for t in e:
