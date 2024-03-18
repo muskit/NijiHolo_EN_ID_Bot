@@ -37,9 +37,9 @@ class Scraper:
                 try:
                     self.app.connect()
                 except:
-                    self.app.sign_in(*acc)
+                    self.app.load_auth_token(acc[1])
             else:
-                self.app.sign_in(*acc)
+                self.app.load_auth_token(acc[1])
             return True
         print("exhausted all accounts!")
         return False

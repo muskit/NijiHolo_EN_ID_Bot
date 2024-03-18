@@ -11,9 +11,9 @@ class AccountPool:
         creds = dotenv_values(working_path(file=".env"))
         i = 0
         while True:
-            if f"scraper_username{i}" in creds and f"scraper_password{i}" in creds:
+            if f"scraper_username_{i}" in creds and f"scraper_auth_token_{i}" in creds:
                 self.__accounts.append(
-                    (creds[f"scraper_username{i}"], creds[f"scraper_password{i}"])
+                    (creds[f"scraper_username_{i}"], creds[f"scraper_auth_token_{i}"])
                 )
                 i += 1
             else:
