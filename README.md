@@ -36,17 +36,17 @@ These need to be defined in a `.env` file in the `run` ephemeral directory.
 ### Scraper Credentials
 To get around rate limitations imposed on users, we scrape with multiple accounts. Each account is defined in the file using the following format:
 ```
-scraper_usernameX=twitter_username
-scraper_passwordX=twitter_password
+scraper_username_X=twitter_username
+scraper_auth_token_X=twitter_auth_token
 ```
 where `X` is a number starting from 0, increasing by 1 for each account added. For instance:
 ```
-scraper_username0=
-scraper_password0=
-scraper_username1=
-scraper_password1=
+scraper_username_0=
+scraper_auth_token_0=
+scraper_username_1=
+scraper_auth_token_1=
 ```
-The first account (`scraper_username0` and `scraper_password0`) **MUST be defined (`scraper_username` and `scraper_password` without number will not work!)**  and will be used to attempt scraping private accounts. Make sure this account follows any private accounts that you want to scrape!
+The first account (`scraper_username_0` and `scraper_auth_token_0`) **MUST be defined (`scraper_username_` and `scraper_auth_token_` without number will not work!)**  and will be used to attempt scraping private accounts. Make sure this account follows any private accounts that you want to scrape!
 ### Twitter API Stuff
 The following keys/tokens are used for the official API via `tweepy`. We mainly use these to just post tweets.
 ```
@@ -56,20 +56,20 @@ user_token=
 user_secret=
 ```
 ### Screenshot Cookie *(optional)*
-This is the authentication token obtained from a browser when signed in on the Twitter website. It's only needed if you want to screenshot tweets from privated accounts. Make sure the token belongs to an account that follows desired private accounts! Maybe have it belong to `scraper_username0`?
+This is the authentication token obtained from a browser when signed in on the Twitter website. It's only needed if you want to screenshot tweets from privated accounts. Make sure the token belongs to an account that follows desired private accounts! Maybe have it belong to `scraper_username_0`?
 ```
 web_auth_token=
 ```
 ### Example `.env` without values
 ```
-scraper_username0=
-scraper_password0=
-scraper_username1=
-scraper_password1=
-scraper_username2=
-scraper_password2=
-scraper_username3=
-scraper_password3=
+scraper_username_0=
+scraper_auth_token_0=
+scraper_username_1=
+scraper_auth_token_1=
+scraper_username_2=
+scraper_auth_token_2=
+scraper_username_3=
+scraper_auth_token_3=
 web_auth_token=
 app_key=
 app_secret=
