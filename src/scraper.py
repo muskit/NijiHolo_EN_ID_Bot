@@ -126,7 +126,7 @@ class Scraper:
         else:
             print(f"grabbing tweets since {since.date()}")
 
-        uid = self.app._get_user_id(username)
+        uid = int(self.app._get_user_id(username))
         print(f"{username} = {uid}")
 
         def add_tweet(tweet: Tweet):
