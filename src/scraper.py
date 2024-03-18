@@ -179,8 +179,12 @@ class Scraper:
                             add_tweet(t)
 
                 cur = search.cursor
-            except (UnknownError, RateLimitReached):
-                print("UnknownError occurred, probably rate-limited")
+            except RateLimitReached:
+                print("RateLimitReached occurred")
+                self.login_wait(uid in talent_lists.privated_accounts)
+            except UnknownError as e:
+                print(f"UnknownError occurred: {e.message}")
+                print("treating like RateLimitReached...")
                 self.login_wait(uid in talent_lists.privated_accounts)
 
         tweets.sort(key=lambda t: t.id)
