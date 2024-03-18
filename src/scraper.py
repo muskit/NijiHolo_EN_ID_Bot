@@ -97,7 +97,10 @@ class Scraper:
                 print("RateLimitReached occurred")
                 self.login_wait(private_user)
             except UnknownError as e:
-                print(f"UnknownError occurred: {e.message}")
+                print(f"UnknownError occurred: {e.message.rstrip()}")
+                if "_Missing" in e.message:  # tweet is probably unavailable
+                    print(f"tweet {id} seems unavailable; skipping...")
+                    return None
                 print("treating like RateLimitReached...")
                 # traceback.print_exc()
                 self.login_wait(private_user)
@@ -182,7 +185,7 @@ class Scraper:
                 print("RateLimitReached occurred")
                 self.login_wait(uid in talent_lists.privated_accounts)
             except UnknownError as e:
-                print(f"UnknownError occurred: {e.message}")
+                print(f"UnknownError occurred: {e.message.rstrip()}")
                 print("treating like RateLimitReached...")
                 self.login_wait(uid in talent_lists.privated_accounts)
 
