@@ -168,6 +168,10 @@ class Scraper:
                 for e in cur_page:
                     if isinstance(e, Tweet):
                         add_tweet(e)
+                        if e == cur_page[-1]:
+                            print(
+                                f"{e.date} (last tweet date) < {since} (since date) ?"
+                            )
                     elif isinstance(e, SelfThread):
                         # FIXME: rework when replied_to is fixed (currently populates user_mentions)
                         # latest tweet in thread = og author's reply
