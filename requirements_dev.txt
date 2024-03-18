@@ -1,7 +1,7 @@
 python-dotenv
 nest-asyncio
 pytz
-git+https://github.com/mahrtayyab/tweety.git@e3d330280cb3b2e8f9d2bf2f20425c476f7671a5
+git+https://github.com/mahrtayyab/tweety.git@49cdda0
 tweepy
 tweet-capture
 opencv-python-headless
