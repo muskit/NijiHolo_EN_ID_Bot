@@ -96,8 +96,9 @@ class Scraper:
             except RateLimitReached:
                 print("RateLimitReached occurred")
                 self.login_wait(private_user)
-            except UnknownError:
-                print("UnknownError occurred, probably rate-limited")
+            except UnknownError as e:
+                print(f"UnknownError occurred: {e.message}")
+                print("treating like RateLimitReached...")
                 # traceback.print_exc()
                 self.login_wait(private_user)
             except Exception as e:
@@ -169,9 +170,7 @@ class Scraper:
                     if isinstance(e, Tweet):
                         add_tweet(e)
                         if e == cur_page[-1]:
-                            print(
-                                f"{e.date} (last tweet date) < {since} (since date) ?"
-                            )
+                            print(f"{e.date} (last tweet) < {since.date} (since) ?")
                     elif isinstance(e, SelfThread):
                         # FIXME: rework when replied_to is fixed (currently populates user_mentions)
                         # latest tweet in thread = og author's reply
