@@ -94,6 +94,7 @@ async def create_ttweet_image(ttweet):
             mode=4,
             night_mode=1,
             show_parent_tweets=True,
+            parent_tweets_limit=3
         )
         img = fix_aspect_ratio(img)
     except:
