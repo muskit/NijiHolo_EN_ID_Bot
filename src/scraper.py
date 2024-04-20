@@ -1,6 +1,7 @@
 from os.path import exists
 from time import sleep
 from datetime import datetime, timedelta
+import traceback
 
 import pytz
 
@@ -37,9 +38,9 @@ class Scraper:
                 try:
                     self.app.connect()
                 except:
-                    self.app.load_auth_token(acc[1])
+                    self.app.sign_in(*acc)
             else:
-                self.app.load_auth_token(acc[1])
+                self.app.sign_in(*acc)
             return True
         print("exhausted all accounts!")
         return False
@@ -101,12 +102,14 @@ class Scraper:
                 if "_Missing" in e.message:  # tweet is probably unavailable
                     print(f"tweet {id} seems unavailable; skipping...")
                     return None
-                print("treating like RateLimitReached...")
+                print("treating like RateLimitReached and using the next scraper...")
                 # traceback.print_exc()
                 self.login_wait(private_user)
             except Exception as e:
                 if not private_user:
-                    print("Unhandled exception occurred, trying again as private...")
+                    print("Unhandled exception occurred getting tweet!")
+                    traceback.print_exc()
+                    print("trying again as pvt-accessible...\n")
                     return self.get_tweet(id, True)
                 else:
                     print(

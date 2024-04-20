@@ -12,11 +12,17 @@ Setup the `.env` in the project root. Refer to the [`.env`](#env) section for va
 
 Build and run the Docker container:
 ```bash
-# to run attached (can CTRL+P,CTRL+Q to detach)
-sh run.sh
+# to delete container and built image
+sh scripts/delete.sh
 
-# ... or to run headless
-sh run_detached.sh
+# to build image
+sh scripts/build.sh
+
+# to create container and run attached (can CTRL+P,CTRL+Q to detach)
+sh scripts/run.sh
+
+# ... or to run headless/detached
+sh scripts/run_detached.sh
 ```
 
 If attached to a container prepared by Dockerfile, you can run the program from project root (not in `src`). Refer to the following section for options.
@@ -36,17 +42,17 @@ These need to be defined in a `.env` file in the `run` ephemeral directory.
 ### Scraper Credentials
 To get around rate limitations imposed on users, we scrape with multiple accounts. Each account is defined in the file using the following format:
 ```
-scraper_username_X=twitter_username
-scraper_auth_token_X=twitter_auth_token
+scraperX_username=twitter_username
+scraperX_password=twitter_auth_token
 ```
 where `X` is a number starting from 0, increasing by 1 for each account added. For instance:
 ```
-scraper_username_0=
-scraper_auth_token_0=
-scraper_username_1=
-scraper_auth_token_1=
+scraper0_username=
+scraper0_password=
+scraper1_username=
+scraper1_password=
 ```
-The first account (`scraper_username_0` and `scraper_auth_token_0`) **MUST be defined (`scraper_username_` and `scraper_auth_token_` without number will not work!)**  and will be used to attempt scraping private accounts. Make sure this account follows any private accounts that you want to scrape!
+The first account (`scraper0_username` and `scraper0_password`) **MUST be defined (`scraper_username` and `scraper_password` without number will not work!)**  and will be used to attempt scraping private accounts. Make sure this account follows any private accounts that you want to scrape!
 ### Twitter API Stuff
 The following keys/tokens are used for the official API via `tweepy`. We mainly use these to just post tweets.
 ```
@@ -56,20 +62,16 @@ user_token=
 user_secret=
 ```
 ### Screenshot Cookie *(optional)*
-This is the authentication token obtained from a browser when signed in on the Twitter website. It's only needed if you want to screenshot tweets from privated accounts. Make sure the token belongs to an account that follows desired private accounts! Maybe have it belong to `scraper_username_0`?
+This is the authentication token obtained from a browser when signed in on the Twitter website. It's only needed if you want to screenshot tweets from privated accounts. Make sure the token belongs to an account that follows desired private accounts! Maybe have it belong to `scraper0`?
 ```
 web_auth_token=
 ```
 ### Example `.env` without values
 ```
-scraper_username_0=
-scraper_auth_token_0=
-scraper_username_1=
-scraper_auth_token_1=
-scraper_username_2=
-scraper_auth_token_2=
-scraper_username_3=
-scraper_auth_token_3=
+scraper0_username=
+scraper0_password=
+scraper1_username=
+scraper1_password=
 web_auth_token=
 app_key=
 app_secret=

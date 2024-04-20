@@ -11,13 +11,14 @@ class AccountPool:
         creds = dotenv_values(working_path(file=".env"))
         i = 0
         while True:
-            if f"scraper_username_{i}" in creds and f"scraper_auth_token_{i}" in creds:
+            if f"scraper{i}_username" in creds and f"scraper{i}_password" in creds:
                 self.__accounts.append(
-                    (creds[f"scraper_username_{i}"], creds[f"scraper_auth_token_{i}"])
+                    (creds[f"scraper{i}_username"], creds[f"scraper{i}_password"])
                 )
                 i += 1
             else:
                 break
+        print(f"{len(self.__accounts)} scraper credentials found!")
 
     def use_index(self, idx):
         self.__idx = idx
