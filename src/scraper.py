@@ -15,8 +15,10 @@ from tweety_utils import *
 from talenttweet import *
 import talent_lists
 
-
+# TODO: on RateLimit encounter, determine when it will probably
+# unlock and wait just until then
 class Scraper:
+    COOLDOWN = 16 # minutes
     def __init__(self):
         Scraper.instance = self
         self.__account = AccountPool()
@@ -48,16 +50,16 @@ class Scraper:
     def login_wait(self, private=False):
         if private:
             print(
-                f"keeping pvt-accessible account ({self.__account.use_index(0)[0]}). sleeping for 4 minutes..."
+                f"keeping pvt-accessible account ({self.__account.use_index(0)[0]}). sleeping for {Scraper.COOLDOWN} minutes..."
             )
-            sleep(240)
+            sleep(60*Scraper.COOLDOWN)
             print()
             l = self.try_login(0)
         else:
             l = self.try_login()
         if not l:
-            print("sleeping for 4 minutes...")
-            sleep(240)
+            print(f"sleeping for {Scraper.COOLDOWN} minutes...")
+            sleep(60*Scraper.COOLDOWN)
             print()
             self.try_login()
 
@@ -191,6 +193,7 @@ class Scraper:
                 print(f"UnknownError occurred: {e.message.rstrip()}")
                 print("treating like RateLimitReached...")
                 self.login_wait(uid in talent_lists.privated_accounts)
+            sleep(5) # FIXME: temporary attempt to avoid scraper lock-up
 
         tweets.sort(key=lambda t: t.id)
         return tweets
