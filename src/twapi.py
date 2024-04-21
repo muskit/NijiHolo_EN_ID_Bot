@@ -130,6 +130,7 @@ class TwAPI:
 
     async def get_ttweet_image_media_id(self, ttweet):
         img = await util.create_ttweet_image(ttweet)
+        print(f"obtaining media id for {img}...")
         media = self.api.media_upload(img)
         return media.media_id
 
@@ -151,41 +152,41 @@ class TwAPI:
             return False
 
         # main tweet: text + screenshot
-        try:
-            print("creating main QRT w/ screenshot...")
-            media_ids = [await self.get_ttweet_image_media_id(ttweet)]
-            twt_resp = await self.post_tweet(
-                text, media_ids=media_ids, quote_tweet_id=ttweet.tweet_id
-            )
-            print("done")
-        except:
-            print(
-                "error occurred trying to create main tweet, falling back to URL-main + reply screencap format"
-            )
-            traceback.print_exc()
-            try:
-                print("posting main tweet...")
-                twt_resp = await self.post_tweet(text, quote_tweet_id=ttweet.tweet_id)
-                print("done")
-                twt_id = twt_resp.data["id"]
+        # try:
+        print("creating main QRT w/ screenshot...")
+        media_ids = [await self.get_ttweet_image_media_id(ttweet)]
+        twt_resp = await self.post_tweet(
+            text, media_ids=media_ids, quote_tweet_id=ttweet.tweet_id
+        )
+        print("done")
+        # except:
+        #     print(
+        #         "error occurred trying to create main tweet, falling back to URL-main + reply screencap format"
+        #     )
+        #     traceback.print_exc()
+        #     try:
+        #         print("posting main tweet...")
+        #         twt_resp = await self.post_tweet(text, quote_tweet_id=ttweet.tweet_id)
+        #         print("done")
+        #         twt_id = twt_resp.data["id"]
 
-                try:
-                    print("creating reply img...", end="")
-                    media_ids = [await self.get_ttweet_image_media_id(ttweet)]
-                    print("posting reply tweet...", end="")
-                    await self.post_tweet(reply_to_tweet=twt_id, media_ids=media_ids)
-                    print("done")
-                except:
-                    print("Had trouble posting reply image tweet.")
-                print("successfully posted ttweet!")
-            except tweepy.Forbidden as e:
-                if "duplicate content" in e.api_messages[0]:
-                    print(
-                        "Twitter says the TalentTweet is a duplicate; skipping error-free..."
-                    )
-                    return False
-                else:
-                    raise e
+        #         try:
+        #             print("creating reply img...", end="")
+        #             media_ids = [await self.get_ttweet_image_media_id(ttweet)]
+        #             print("posting reply tweet...", end="")
+        #             await self.post_tweet(reply_to_tweet=twt_id, media_ids=media_ids)
+        #             print("done")
+        #         except:
+        #             print("Had trouble posting reply image tweet.")
+        #         print("successfully posted ttweet!")
+        #     except tweepy.Forbidden as e:
+        #         if "duplicate content" in e.api_messages[0]:
+        #             print(
+        #                 "Twitter says the TalentTweet is a duplicate; skipping error-free..."
+        #             )
+        #             return False
+        #         else:
+        #             raise e
         return True
 
     async def post_ttweet_by_id(self, id: int, dry_run=False):

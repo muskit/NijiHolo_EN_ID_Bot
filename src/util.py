@@ -83,6 +83,7 @@ async def create_ttweet_image(ttweet):
         tc.driver_path = "/usr/bin/chromedriver"
     filename = working_path(file="img.png")
     img = None
+    print(f"Creating image for TalentTweet {ttweet.url()}")
     try:
         os.remove(filename)
     except:
@@ -94,11 +95,12 @@ async def create_ttweet_image(ttweet):
             mode=4,
             night_mode=1,
             show_parent_tweets=True,
-            parent_tweets_limit=3
+            #parent_tweets_limit=3
         )
         img = fix_aspect_ratio(img)
-    except:
-        print("unable to create tweet image")
+    except Exception as e:
+        print("ERROR: unable to create tweet image")
+        print(e)
         traceback.print_exc()
         return None
 
