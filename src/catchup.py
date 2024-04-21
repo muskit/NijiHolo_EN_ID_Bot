@@ -16,8 +16,9 @@ import ttweetqueue as ttq
 
 PROGRAM_ARGS = None
 
+preempt_done = False
 safe_to_post_tweets = True
-scraper: Scraper
+scraper = Scraper()
 
 
 # Updates TTweetQueue
@@ -127,13 +128,13 @@ async def process_queue() -> bool:
 # return False = issue occurred where we couldn't post all past tweets properly
 async def run(PROGRAM_ARGS):
     global safe_to_post_tweets
+    global preempt_done
     global scraper
     global queue
 
-    scraper = Scraper()
     queue = ttq.TalentTweetQueue.instance
 
-    # post tweets given in command line first
+    # OPTION: post tweets given in command line first
     if PROGRAM_ARGS.post_id is not None and len(PROGRAM_ARGS.post_id) > 0:
         PROGRAM_ARGS.post_id.sort()
         print("Posting specified tweets first.")
@@ -150,11 +151,38 @@ async def run(PROGRAM_ARGS):
                 print("Successfully posted tweet. Sleeping for 5 minutes")
                 await asyncio.sleep(60 * 5)
             else:
-                print("Did not post tweet")
+                print("Did not post tweet\n")
         print("Done processing specified tweets")
         PROGRAM_ARGS.post_id = None
 
-    # refresh stored queue first
+    # PREEMPT: post tweet IDs in preempt.txt if exists and not empty
+    if not preempt_done:
+        try:
+            with open(working_path(file="preempt.txt"), "r") as preempt_file:
+                print("Found preempt.txt! Posting stored IDs unconditionally...")
+
+                for l in preempt_file:
+                    if len(l) == 0: continue
+                    try:
+                        id = int(l.strip().split()[0])
+                    except:
+                        print(f"Error occurred processing {l}, skipping...")
+                        continue
+
+                    posted = await TwAPI.instance.post_ttweet_by_id(id, PROGRAM_ARGS.dry_run)
+                    if posted:
+                        queue.add_finished_tweet(id)
+                        print("Successfully posted tweet. Sleeping for 5 minutes")
+                        await asyncio.sleep(60 * 5)
+                    else:
+                        print("Could not post tweet\n")
+
+                print("Finished processing preempt.txt")
+                preempt_done = True
+        except FileNotFoundError:
+            print("preempt.txt wasn't found")
+
+    # OPTION: refresh stored queue first
     if PROGRAM_ARGS.refresh_queue:
         PROGRAM_ARGS.refresh_queue = False
         print("Refreshing queue tweets...")
