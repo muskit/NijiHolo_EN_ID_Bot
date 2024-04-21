@@ -17,7 +17,7 @@ RUN pip3 install --break-system-packages -r requirements.txt
 # Copy source code
 COPY . .
 
-# Mount working directory
+# Mount persistent working directory
 VOLUME ./run
 
 # Run the bot
