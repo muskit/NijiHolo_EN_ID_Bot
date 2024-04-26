@@ -142,6 +142,7 @@ class TwAPI:
         print(
             f"------{ttweet.tweet_id} ({util.get_username_local(ttweet.author_id)})------"
         )
+        print(ttweet)
 
         text = ttweet.announce_text()
         ttweet_url = ttweet.url()
