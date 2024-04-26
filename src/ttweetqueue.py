@@ -73,9 +73,9 @@ class TalentTweetQueue:
                 for line in f:
                     if len(line) > 0:
                         ttweet = tt.TalentTweet.deserialize(line)
-                        if ttweet.tweet_id in self.ttweets_dict:
-                            self.ttweets_dict[ttweet.tweet_id] = ttweet
+                        if ttweet.tweet_id not in self.ttweets_dict:
                             print(f"adding unfinished tweet {ttweet.tweet_id}")
+                            self.ttweets_dict[ttweet.tweet_id] = ttweet
         # finished ttweets
         try:
             with open(self.finished_ttweets_path, "r") as f:
