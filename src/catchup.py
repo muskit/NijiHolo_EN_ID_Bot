@@ -88,7 +88,7 @@ async def process_queue() -> bool:
 
     queued_ttweets_count = queue.get_count()
 
-    WAIT_TIME = 60 * 15
+    WAIT_TIME = 60 * 30 # 30 minutes
     ttweets_posted = 0
 
     if queued_ttweets_count == 0:
@@ -111,7 +111,7 @@ async def process_queue() -> bool:
                 ttweets_posted += 1
                 print(f"({ttweets_posted}/{queued_ttweets_count}) done")
                 if not queue.is_empty():
-                    print(f"resting for {WAIT_TIME}s...")
+                    print(f"resting for {WAIT_TIME/60} minutes...")
                     await asyncio.sleep(WAIT_TIME - 5)
                     print("5 second warning!")
                     await asyncio.sleep(5)
