@@ -311,9 +311,11 @@ class TalentTweet:
                 rtm_msg(QUOTED_TWEET_MENTIONS_B, quoted_username)
             else:
                 ret += QUOTE_TWEET.format(author_username, quoted_username)
-        elif len(self.mentions) > 0:  # standalone tweet
+        elif len(self.mentions) > 0:  # standalone tweet that mentions other
             ret += TWEET.format(author_username, ", ".join(mention_usernames))
             mention_usernames.clear()
+        elif len(self.rt_mentions) > 0: # reply to non-talent tweet that mentions B
+            rtm_msg(REPLY_TO_MENTION_B, "")
         else:
             raise ValueError(
                 f"TalentTweet {self.tweet_id} has insufficient other parties"
