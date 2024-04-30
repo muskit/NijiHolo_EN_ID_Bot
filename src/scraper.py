@@ -89,7 +89,7 @@ class Scraper:
         return tweet
 
     def get_tweet(self, id: int, private_user=False):
-        # print(f'{id}{" on private" if private_user else ""}')
+        # print(f'getting {id}{" on private" if private_user else ""}')
         if private_user:
             self.try_login(0)
         while True:
@@ -101,23 +101,27 @@ class Scraper:
                 self.login_wait(private_user)
             except UnknownError as e:
                 print(f"UnknownError occurred: {e.message.rstrip()}")
-                if any(x in e.message.lower() for x in ["missing", "post is unavailable"]) :  # tweet is probably unavailable
-                    print(f"tweet {id} seems unavailable; skipping...")
-                    return None
-                print("treating like RateLimitReached and using the next scraper...")
+                print(f"skipping attempt to get tweet {id}...")
+                return None
+                # if any(x in e.message.lower() for x in ["missing", "post is unavailable", "delete"]) :  # tweet is probably unavailable
+                #     print(f"tweet {id} seems unavailable; skipping...")
+                #     return None
+                # if "account owner limits" in e.message.lower(): # private tweet
+                #     print("trying again as pvt-accessible...\n")
+                #     return self.get_tweet(id, True)
+                # print("treating like RateLimitReached and using the next scraper...")
                 # traceback.print_exc()
-                self.login_wait(private_user)
+                # self.login_wait(private_user)
             except Exception as e:
-                if not private_user:
-                    print("Unhandled exception occurred getting tweet!")
+                # if not private_user:
+                #     print("Unhandled exception occurred getting tweet!")
+                #     traceback.print_exc()
+                #     print("trying again as pvt-accessible...\n")
+                #     return self.get_tweet(id, True)
+                # else:
+                    print("Unhandled exception occurred")
                     traceback.print_exc()
-                    print("trying again as pvt-accessible...\n")
-                    return self.get_tweet(id, True)
-                else:
-                    print(
-                        f"Unhandled exception occurred, tweet {id} is probably unavailable"
-                    )
-                    print(e)
+                    print(f"skipping tweet {id}")
                     return None
 
     # since MUST BE TIMEZONE AWARE
@@ -187,10 +191,10 @@ class Scraper:
 
                 cur = search.cursor
             except RateLimitReached:
-                print("RateLimitReached occurred")
+                print("RateLimitReached occurred getting tweets from user")
                 self.login_wait(uid in talent_lists.privated_accounts)
             except UnknownError as e:
-                print(f"UnknownError occurred: {e.message.rstrip()}")
+                print(f"UnknownError occurred getting tweets from user: {e.message.rstrip()}")
                 print("treating like RateLimitReached...")
                 self.login_wait(uid in talent_lists.privated_accounts)
             sleep(5) # FIXME: temporary attempt to avoid scraper lock-up
