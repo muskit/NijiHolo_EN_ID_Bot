@@ -101,7 +101,7 @@ class Scraper:
                 self.login_wait(private_user)
             except UnknownError as e:
                 print(f"UnknownError occurred: {e.message.rstrip()}")
-                if "_Missing" in e.message:  # tweet is probably unavailable
+                if any(x in e.message.lower() for x in ["missing", "post is unavailable"]) :  # tweet is probably unavailable
                     print(f"tweet {id} seems unavailable; skipping...")
                     return None
                 print("treating like RateLimitReached and using the next scraper...")
