@@ -5,6 +5,8 @@ Twitter bot that tracks cross-company interactions between the non-JP branches o
 
 **This project was created to run [this account](https://twitter.com/NijiHolo_EN_ID).**
 
+![Screenshot_20230912_235245](https://github.com/muskit/muskit/assets/15199219/0359fb26-8a48-4698-9b78-66d7d852099e)
+
 ## Running
 With the way packages are setup, **you must have Docker installed and running!!**
 
